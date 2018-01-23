@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "wort"
+author = "Luiz Irber"
+author-email = "wort@luizirber.org"
+home-page = "http://luizirber.org"
+classifiers = ["License :: OSI Approved :: MIT License"]
+

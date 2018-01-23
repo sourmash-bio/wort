@@ -1,0 +1,19 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+flask = "==0.12.2"
+gunicorn = "==19.7.1"
+redis = "==2.10.6"
+celery = "==4.1.0"
+snakemake = "==4.5.0"
+
+
+[dev-packages]
+
+flit = "*"

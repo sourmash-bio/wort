@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+
+  db:
+    restart: always
+    image: postgres:9.6-alpine
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  redis:
+    restart: always
+    image: redis:4.0-alpine
+    volumes:
+      - ./redis:/data
+
+  celery-beat:
+    build: .
+      context: .
+    command: celery beat
+    links:
+      - redis
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    image: wort-worker
+    command: celery worker
+    depends_on:
+      - celery-beat
+    links:
+      - redis
+
+  web:
+    restart: always
+    build: .
+    command: python3 app.py
+    ports:
+      - "5000:5000"
+    links:
+      - redis
+      - db
+    depends_on:
+      - db
+      - redis
+#    volumes:
+#      - ./public/assets:/mastodon/public/assets
+#      - ./public/system:/mastodon/public/system
