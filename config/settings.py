@@ -1,7 +1,7 @@
 DEBUG = True
 
-SERVER_NAME = 'localhost:8000'
-SECRET_KEY = 'insecurekeyfordev'
+#SERVER_NAME = '0.0.0.0:5000'
+#SECRET_KEY = 'insecurekeyfordev'
 
 # Celery.
 CELERY_BROKER_URL = 'redis://redis:6379/0'

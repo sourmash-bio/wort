@@ -1,0 +1,14 @@
+FROM python:3.6.4-slim-stretch
+
+EXPOSE 5000
+
+RUN pip install pipenv flit
+
+WORKDIR /app
+
+#COPY Pipfile.lock wort pyproject.toml config/ ./
+COPY . .
+
+RUN pipenv install --system --deploy --ignore-pipfile
+
+CMD gunicorn -b 0.0.0.0:5000 --access-logfile - "wort.app:create_app()"

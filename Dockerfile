@@ -5,13 +5,10 @@ RUN groupadd user && \
 
 WORKDIR /home/user
 
-ADD Pipfile.lock ./
+ADD Pipfile.lock wort/ pyproject.toml config/ ./
 
-RUN pip install pipenv
+RUN pip install pipenv flit
 RUN pipenv install --system --deploy --ignore-pipfile
+RUN flit --symlink
 
 USER user
-
-#COPY soursigs soursigs
-#
-#CMD celery -A soursigs -l INFO -c 1 worker

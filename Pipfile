@@ -16,4 +16,4 @@ snakemake = "==4.5.0"
 
 [dev-packages]
 
-flit = "*"
+flit = "==0.13"
