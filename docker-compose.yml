@@ -11,6 +11,8 @@ services:
   redis:
     restart: always
     image: redis:4.0-alpine
+    ports:
+      - "6379:6379"
     volumes:
       - ./redis:/data
 
@@ -22,6 +24,18 @@ services:
     links:
       - redis
 
+  celery-flower:
+    build:
+      context: .
+      dockerfile: Dockerfile.flower
+    image: flower
+    ports:
+      - "5555:5555"
+    links:
+      - redis
+    environment:
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+
   celery-worker:
     build:
       context: .
@@ -31,6 +45,8 @@ services:
       - celery-beat
     links:
       - redis
+    env_file:
+      - iam/wort_s3.env
 
   web:
     restart: always

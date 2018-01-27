@@ -12,7 +12,7 @@ def index():
 def compute_sra(sra_id):
     from . import tasks
 
-    task = tasks.compute.apply(sra_id)
+    task = tasks.compute.delay(sra_id)
     return (jsonify({'task_id': task.id}), 202,
                   {'Location': url_for('compute.taskstatus', task_id=task.id)})
 
