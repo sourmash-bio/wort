@@ -17,3 +17,5 @@ snakemake = "==4.5.0"
 [dev-packages]
 
 flit = "==0.13"
+pandas = "*"
+ipython = "*"
