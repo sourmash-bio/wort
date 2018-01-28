@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    command: celery -A wort beat
+    command: celery -A wort.blueprints.compute.tasks beat
     links:
       - redis
 
@@ -41,8 +41,6 @@ services:
       context: .
       dockerfile: Dockerfile.worker
     image: wort-worker
-    depends_on:
-      - celery-beat
     links:
       - redis
     env_file:
