@@ -11,18 +11,26 @@ celery = create_celery_app()
 
 @celery.task
 def compute(sra_id):
-    from boto.s3.connection import S3Connection
-    from boto.s3.key import Key
+    import boto3
+    import botocore
     from snakemake import shell
 
-    conn = S3Connection()
-    bucket = conn.get_bucket("wort-sra")
+    s3 = boto3.resource('s3')
 
-    key = bucket.get_key(os.path.join('sigs', sra_id + '.sig'))
-    if key is not None:  # result not available yet, compute it
+    key_path = os.path.join('sigs', sra_id + '.sig')
+    try:
+        s3.Object('wort-sra', key_path).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == '404':
+            pass  # Object does not exist, let's compute it later
+        else:
+            # Something else has gone wrong
+            raise
+    else:
+        # The key already exists
         return
 
-    with NamedTemporaryFile('w+t') as f:
+    with NamedTemporaryFile('w+b') as f:
         try:
             shell('fastq-dump -A {sra_id} -Z | '
                   'sourmash compute -k 21,31,51 '
@@ -42,10 +50,11 @@ def compute(sra_id):
                 raise e
 
         # save to S3
-        k = Key(bucket)
-        k.key = os.path.join('sigs', sra_id + '.sig')
+        key = s3.Object('wort-sra', key_path)
         f.seek(0)
-        k.set_contents_from_string(f.read())
+        # TODO: compress using gzip here!
+        # https://gist.github.com/veselosky/9427faa38cee75cd8e27
+        key.upload_fileobj(f)
 
 
 @celery.task
