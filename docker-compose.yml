@@ -76,3 +76,5 @@ services:
       - redis
     volumes:
       - .:/app
+    env_file:
+      - iam/wort_s3.env

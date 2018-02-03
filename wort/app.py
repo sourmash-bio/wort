@@ -3,6 +3,7 @@ from celery import Celery
 
 from wort.blueprints.compute import compute
 from wort.blueprints.submit import submit
+from wort.blueprints.viewer import viewer
 
 
 CELERY_TASK_LIST = [
@@ -51,6 +52,7 @@ def create_app(settings_override=None):
 
     app.register_blueprint(compute)
     app.register_blueprint(submit)
+    app.register_blueprint(viewer)
     #extensions(app)
 
     return app
