@@ -32,4 +32,4 @@ RUN echo '/repository/user/cache-disabled = "true"' > .ncbi/user-settings.mkfg
 COPY wort wort
 COPY config config
 
-CMD celery -A wort.blueprints.compute.tasks --without-gossip --without-mingle --without-heartbeat -E -l INFO -c 1 worker
+CMD celery -A wort.blueprints.compute.tasks --without-gossip --without-mingle --without-heartbeat -l INFO -c 1 worker
