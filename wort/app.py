@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_migrate import Migrate
+
 from celery import Celery
 
 from wort.blueprints.compute import compute
@@ -45,10 +47,14 @@ def create_app(settings_override=None):
     app = Flask(__name__, instance_relative_config=True)
 
     app.config.from_object('config.settings')
-    #app.config.from_pyfile('settings.py', silent=True)
 
     if settings_override:
         app.config.update(settings_override)
+
+    from wort.models import db
+    db.init_app(app)
+    app.migrate = Migrate(app, db)
+    app.db = db
 
     app.register_blueprint(compute)
     app.register_blueprint(submit)

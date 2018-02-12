@@ -7,6 +7,8 @@ services:
     image: postgres:9.6-alpine
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+    env_file:
+      - env.production
 
   redis:
     restart: always
@@ -58,14 +60,7 @@ services:
         "wort.app:create_app()"
     environment:
       PYTHONUNBUFFERED: 'true'
-
-#    entrypoint:
-#      - flask
-#      - run
-#      - --host=0.0.0.0
-#    environment:
-#      FLASK_DEBUG: 1
-#      FLASK_APP: ./app.py
+      FLASK_APP: 'wortapp.py'
     ports:
       - "5000:5000"
     links:
@@ -77,4 +72,4 @@ services:
     volumes:
       - .:/app
     env_file:
-      - iam/wort_s3.env
+      - env.production
