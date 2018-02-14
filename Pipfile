@@ -16,6 +16,8 @@ snakemake = "==4.5.0"
 flask-wtf = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
+flask-login = "*"
+flask-httpauth = "*"
 
 
 [dev-packages]
@@ -23,3 +25,4 @@ flask-migrate = "*"
 flit = "==0.13"
 pandas = "*"
 ipython = "*"
+httpie = "*"

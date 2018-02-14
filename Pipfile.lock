@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "69454093be7193c9f6b28c94d36616589628fa67fd7172f29a6f7a2760ee1732"
+            "sha256": "c9a205d80a35fbcf550fda6f1340344741a212f71abf680671132caced9efd81"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -116,6 +116,19 @@
                 "sha256:49f44461237b69ecd901cc7ce66feea0319b9158743dd27a2899962ab214dac1"
             ],
             "version": "==0.12.2"
+        },
+        "flask-httpauth": {
+            "hashes": [
+                "sha256:c2ba01d832827f1d1bab39b321a134f9dded8d48f87e71c86ee16848d8e5a422",
+                "sha256:5f4ba7ab79103e28b566c6a0592076312d17c716e079c66ca9ffe21a7871ee8d"
+            ],
+            "version": "==3.2.3"
+        },
+        "flask-login": {
+            "hashes": [
+                "sha256:c815c1ac7b3e35e2081685e389a665f2c74d7e077cb93cecabaea352da4752ec"
+            ],
+            "version": "==0.4.1"
         },
         "flask-migrate": {
             "hashes": [
@@ -386,6 +399,13 @@
                 "sha256:8f558351bf4bb82b872d3bdbea7055cbb2e33ed2bdf809284bf927d4c78bf0ee"
             ],
             "version": "==0.13"
+        },
+        "httpie": {
+            "hashes": [
+                "sha256:ff90f500fb2a12a8b797e668de3f4f51978b5716ffd254acd5162fefb1dc026f",
+                "sha256:f1202e6fa60367e2265284a53f35bfa5917119592c2ab08277efc7fffd744fcb"
+            ],
+            "version": "==0.9.9"
         },
         "idna": {
             "hashes": [
