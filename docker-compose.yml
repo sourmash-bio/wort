@@ -62,7 +62,7 @@ services:
       PYTHONUNBUFFERED: 'true'
       FLASK_APP: 'wortapp.py'
     ports:
-      - "5000:5000"
+      - "5000"
     links:
       - redis
       - db
@@ -76,20 +76,19 @@ services:
 
   proxy:
     restart: always
-    image: nginx
+    build:
+      context: nginx
+      dockerfile: Dockerfile
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./letsencrypt_certs:/etc/nginx/certs
       - ./letsencrypt_www:/var/www/letsencrypt
     ports:
       - "80:80"
       - "443:443"
-    links:
-      - web:wort.oxli.org
 
   letsencrypt:
     image: certbot/certbot
     command: /bin/true
     volumes:
-      - ./letsencrypt_certs:/etc/nginx/certs
+      - ./letsencrypt_certs:/etc/letsencrypt
       - ./letsencrypt_www:/var/www/letsencrypt

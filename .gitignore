@@ -1,2 +1,7 @@
 **/__pycache__
 redis/
+env.production
+iam/
+integration/
+letsencrypt_certs/
+*.swp
