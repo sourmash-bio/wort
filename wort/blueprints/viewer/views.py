@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, jsonify, redirect
 viewer = Blueprint('viewer', __name__, template_folder='templates')
 
 
-@viewer.route('/viewer/<sra_id>')
+@viewer.route('/view/sra/<sra_id>')
 def view_sra(sra_id):
     import boto3
 
