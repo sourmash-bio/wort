@@ -38,9 +38,7 @@ def compute(sra_id):
                   '  --track-abundance '
                   '  --name {sra_id} '
                   '  -o {output} '
-                  '  - '
-                  .format(sra_id=sra_id,
-                          output=f.name))
+                  '  - '.format(sra_id=sra_id, output=f.name))
         except CalledProcessError as e:
             # We ignore SIGPIPE, since it is informational (and makes sense,
             # it happens because `head` is closed and `fastq-dump` can't pipe
@@ -64,8 +62,7 @@ def compute_syrah(sra_id):
         try:
             shell('fastq-dump -A {sra_id} -Z | syrah | '
                   'sourmash compute -k 21 --dna - -o {output} --name {sra_id}'
-                  .format(sra_id=sra_id,
-                          output=f.name))
+                  .format(sra_id=sra_id, output=f.name))
         except CalledProcessError as e:
             # We ignore SIGPIPE, since it is informational (and makes sense,
             # it happens because `head` is closed and `fastq-dump` can't pipe
@@ -92,10 +89,10 @@ def compute_syrah_to_s3(self, sra_id):
     if key is None:  # result not available yet, compute it
         with NamedTemporaryFile('w+t') as f:
             try:
-                shell('fastq-dump -A {sra_id} -Z | syrah | '
-                      'sourmash compute -k 21 --dna - -o {output} --name {sra_id}'
-                      .format(sra_id=sra_id,
-                              output=f.name))
+                shell(
+                    'fastq-dump -A {sra_id} -Z | syrah | '
+                    'sourmash compute -k 21 --dna - -o {output} --name {sra_id}'
+                    .format(sra_id=sra_id, output=f.name))
             except CalledProcessError as e:
                 # We ignore SIGPIPE, since it is informational (and makes sense,
                 # it happens because `head` is closed and `fastq-dump` can't pipe
