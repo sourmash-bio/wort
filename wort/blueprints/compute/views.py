@@ -10,7 +10,7 @@ def index():
     return jsonify({'key': "Hello World"})
 
 
-@compute.route('/compute/<sra_id>', methods=['POST'])
+@compute.route('/compute/sra/<sra_id>', methods=['POST'])
 @token_auth.login_required
 def compute_sra(sra_id):
     from . import tasks
