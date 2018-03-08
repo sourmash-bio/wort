@@ -7,7 +7,7 @@ WORKDIR /home/user
 
 # install sra-toolkit 2.8.2-1 and requirements
 
-ADD Pipfile.lock ./
+ADD Pipfile Pipfile.lock ./
 
 RUN apt-get update && \
     apt-get install -y git libgomp1 build-essential libssl-dev libcurl4-openssl-dev curl && \
@@ -16,7 +16,7 @@ RUN apt-get update && \
     rm sratoolkit.tar.gz && \
     find sratoolkit.2.8.2-1-ubuntu64 ! -type d ! -name "fastq-dump*" -a ! -name "*.kfg" -delete && \
     pip install pipenv && \
-    pipenv install --system --deploy --ignore-pipfile && \
+    pipenv install --system --deploy && \
     pip install "git+https://github.com/dib-lab/sourmash.git@master" && \
     apt-get remove -y curl git build-essential libssl-dev && \
     apt-get autoremove -y
