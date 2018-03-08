@@ -9,7 +9,7 @@ viewer = Blueprint('viewer', __name__, template_folder='templates')
 def view_s3(db, dataset_id):
 
     if db not in ('sra', 'img'):
-        return 404
+        return "Database not supported", 404
 
     import boto3
 

@@ -8,7 +8,12 @@ WORKDIR /home/user
 ADD Pipfile.lock wort/ pyproject.toml config/ ./
 
 RUN pip install pipenv flit
-RUN pipenv install --system --deploy --ignore-pipfile
+RUN apt-get update && \
+    apt-get install -y build-essential libcurl4-openssl-dev && \
+    pipenv install --system --deploy --ignore-pipfile && \
+    apt-get remove -y build-essential && \
+    apt-get autoremove -y
+
 RUN flit --symlink
 
 USER user

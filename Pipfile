@@ -10,7 +10,7 @@ name = "pypi"
 flask = "==0.12.2"
 gunicorn = "==19.7.1"
 redis = "==2.10.6"
-celery = "==4.1.0"
+celery = {extras = ["sqs"]}
 snakemake = "==4.5.0"
 "boto3" = "==1.5.22"
 flask-wtf = "*"
@@ -18,6 +18,8 @@ flask-migrate = "*"
 "psycopg2" = "*"
 flask-login = "*"
 flask-httpauth = "*"
+"celery-s3" = "*"
+pycurl = "*"
 
 
 [dev-packages]
