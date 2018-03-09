@@ -10,41 +10,11 @@ services:
     env_file:
       - env.production
 
-  redis:
-    restart: always
-    image: redis:4.0-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./redis:/data
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile.worker
-    command: celery -A wort.blueprints.compute.tasks beat
-    links:
-      - redis
-
-  celery-flower:
-    build:
-      context: .
-      dockerfile: Dockerfile.flower
-    image: flower
-    ports:
-      - "5555:5555"
-    links:
-      - redis
-    environment:
-      CELERY_BROKER_URL: "redis://redis:6379/0"
-
-  celery-worker:
+  worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
     image: wort-worker
-    links:
-      - redis
     env_file:
       - iam/wort_s3.env
 
@@ -52,11 +22,10 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     command: >
       gunicorn -b 0.0.0.0:5000
         --access-logfile -
-        --reload
         "wort.app:create_app()"
     environment:
       PYTHONUNBUFFERED: 'true'
@@ -64,13 +33,9 @@ services:
     ports:
       - "5000"
     links:
-      - redis
       - db
     depends_on:
       - db
-      - redis
-    volumes:
-      - .:/app
     env_file:
       - env.production
 
