@@ -32,7 +32,7 @@ def compute(sra_id):
 
     with NamedTemporaryFile('w+b') as f:
         try:
-            shell('fastq-dump -A {sra_id} -Z | '
+            shell('fastq-dump --fasta 0 -A {sra_id} -Z | '
                   'sourmash compute -k 21,31,51 '
                   '  --scaled 1000 '
                   '  --track-abundance '
