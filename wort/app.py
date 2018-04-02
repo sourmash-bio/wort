@@ -10,9 +10,7 @@ from wort.blueprints.errors import errors
 
 from wort.ext import login, db, migrate
 
-CELERY_TASK_LIST = [
-    'wort.blueprints.compute.tasks',
-]
+CELERY_TASK_LIST = ["wort.blueprints.compute.tasks"]
 
 
 def create_celery_app(app=None):
@@ -26,8 +24,9 @@ def create_celery_app(app=None):
 
     celery = Celery(
         app.import_name,
-        broker=app.config['CELERY_BROKER_URL'],
-        include=CELERY_TASK_LIST)
+        broker=app.config["CELERY_BROKER_URL"],
+        include=CELERY_TASK_LIST,
+    )
     celery.conf.update(app.config)
     TaskBase = celery.Task
 
@@ -50,7 +49,7 @@ def create_app(settings_override=None):
     """
     app = Flask(__name__, instance_relative_config=True)
 
-    app.config.from_object('config.settings')
+    app.config.from_object("config.settings")
 
     if settings_override:
         app.config.update(settings_override)
@@ -59,7 +58,7 @@ def create_app(settings_override=None):
     app.register_blueprint(compute)
     app.register_blueprint(submit)
     app.register_blueprint(viewer)
-    app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(api, url_prefix="/api")
     extensions(app)
 
     return app

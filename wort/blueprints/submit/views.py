@@ -1,18 +1,20 @@
 from flask import Blueprint, request, jsonify, flash
 
-submit = Blueprint('submit', __name__, template_folder='templates')
+submit = Blueprint("submit", __name__, template_folder="templates")
 
 
-@submit.route('/submit', methods=['GET', 'POST'])
+@submit.route("/submit", methods=["GET", "POST"])
 def submit_sigs():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
+    if request.method == "POST":
+        if "file" not in request.files:
+            flash("No file part")
             return redirect(request.url)
-        f = request.files['file']
-        print(f, request.form['public_url'])
+
+        f = request.files["file"]
+        print(f, request.form["public_url"])
         return jsonify({}), 200
-    return '''
+
+    return """
     <!doctype html>
     <title>Upload new File</title>
     <h1>Upload new File</h1>
@@ -21,4 +23,4 @@ def submit_sigs():
          <input type=text name=public_url>
          <input type=submit value=Upload>
     </form>
-    '''
+    """

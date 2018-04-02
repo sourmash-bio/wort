@@ -12,6 +12,7 @@ def verify_password(username, password):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return False
+
     g.current_user = user
     return user.check_password(password)
 
