@@ -26,18 +26,21 @@ services:
     command: >
       gunicorn -b 0.0.0.0:5000
         --access-logfile -
+        --reload
         "wort.app:create_app()"
     environment:
       PYTHONUNBUFFERED: 'true'
       FLASK_APP: 'wortapp.py'
     ports:
-      - "5000"
+      - "5000:5000"
     links:
       - db
     depends_on:
       - db
     env_file:
       - env.production
+    volumes:
+      - .:/app/wort
 
   proxy:
     restart: always

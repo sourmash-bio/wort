@@ -1,18 +1,15 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 flask = "==0.12.2"
 gunicorn = "==19.7.1"
 redis = "==2.10.6"
 celery = {extras = ["sqs"]}
 snakemake = "==4.5.0"
-"boto3" = "==1.5.22"
+"boto3" = "==1.7.83"
 flask-wtf = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
@@ -21,13 +18,13 @@ flask-httpauth = "*"
 "celery-s3" = "*"
 pycurl = "*"
 
-
 [dev-packages]
-
 flit = "==0.13"
 pandas = "*"
 ipython = "*"
 httpie = "*"
-yapf = "*"
 requests = "*"
 black = "*"
+
+[pipenv]
+allow_prereleases = true
