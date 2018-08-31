@@ -1,4 +1,3 @@
-from flask import Flask
 import connexion
 
 from celery import Celery
@@ -48,7 +47,6 @@ def create_app(settings_override=None):
     :param settings_override: Override settings
     :return: Flask app
     """
-    # app = Flask(__name__, instance_relative_config=True)
     app = connexion.App(__name__, swagger_ui=True, swagger_json=True)
     app.add_api("api.yaml")
 
