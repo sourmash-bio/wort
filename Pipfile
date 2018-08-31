@@ -17,6 +17,7 @@ flask-login = "*"
 flask-httpauth = "*"
 "celery-s3" = "*"
 pycurl = "*"
+connexion = "*"
 
 [dev-packages]
 flit = "==0.13"
