@@ -16,7 +16,6 @@ fn viewer(db: &str, dataset_id: &str) -> Result<(), Box<Error>> {
 fn main() {
     let yml = load_yaml!("wort.yml");
     let m = App::from_yaml(yml).get_matches();
-    //println!("{:?}", m);
 
     if let Some(cmd) = m.subcommand_matches("viewer") {
         viewer(
