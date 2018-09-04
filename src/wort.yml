@@ -1,0 +1,25 @@
+name: wort
+version: "0.1.0"
+about: Interact with the wort API from the command line
+author: Luiz Irber <wort@luizirber.org>
+
+settings:
+    - ArgRequiredElseHelp
+
+subcommands:
+    - viewer:
+        about: view a signature
+        settings:
+            - ArgRequiredElseHelp
+        args:
+            - database:
+                short: d 
+                help: database id
+                takes_value: true
+                default_value: sra
+                possible_values:
+                  - img
+                  - sra
+            - dataset_id:
+                help: ID of the dataset in the DB
+                index: 1
