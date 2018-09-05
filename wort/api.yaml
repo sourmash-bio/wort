@@ -27,7 +27,7 @@ paths:
   '/compute/sra/{sra_id}':
     post:
       summary: Request to compute a new signature from an SRA dataset
-      operationId: wort.api.compute_sra
+      operationId: wort.blueprints.compute.views.compute_sra
       parameters:
         - $ref: '#/parameters/sra_id'
       responses:
@@ -36,7 +36,7 @@ paths:
   '/view/{public_db}/{dataset_id}':
     get:
       summary: Return a signature
-      operationId: wort.api.view_s3
+      operationId: wort.blueprints.viewer.views.view_s3
       parameters:
         - $ref: '#/parameters/public_db'
         - $ref: '#/parameters/dataset_id'

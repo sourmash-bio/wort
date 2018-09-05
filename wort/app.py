@@ -55,14 +55,18 @@ def create_app(settings_override=None):
     if settings_override:
         app.config.update(settings_override)
 
-    # app.register_blueprint(errors)
-    # app.register_blueprint(compute)
-    # app.register_blueprint(submit)
-    # app.register_blueprint(viewer)
-    # app.register_blueprint(api, url_prefix="/api")
+    blueprints(app.app)
     extensions(app.app)
 
     return app
+
+
+def blueprints(app):
+    app.register_blueprint(errors)
+    app.register_blueprint(compute)
+    app.register_blueprint(submit)
+    app.register_blueprint(viewer)
+    app.register_blueprint(api, url_prefix="/api")
 
 
 def extensions(app):

@@ -1,14 +1,12 @@
-import os
-
 from flask import Blueprint, render_template, jsonify, redirect
 
 viewer = Blueprint("viewer", __name__, template_folder="templates")
 
 
-@viewer.route("/view/<db>/<dataset_id>")
-def view_s3(db, dataset_id):
+# @viewer.route("/view/<db>/<dataset_id>")
+def view_s3(public_db, dataset_id):
 
-    if db not in ("sra", "img"):
+    if public_db not in ("sra", "img"):
         return "Database not supported", 404
 
     import boto3
@@ -18,13 +16,13 @@ def view_s3(db, dataset_id):
     key = f"sigs/{dataset_id}.sig"
     # TODO: we don't really need this, I just copied the signatures improperly
     # to the bucket...
-    if db == "img":
+    if public_db == "img":
         key = f"{dataset_id}.sig"
 
     url = conn.generate_presigned_url(
         "get_object",
         Params={
-            "Bucket": f"wort-{db}",
+            "Bucket": f"wort-{public_db}",
             "Key": key,
             "ResponseContentType": "application/json",
             # 'ResponseContentEncoding': 'gzip',
