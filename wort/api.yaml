@@ -1,6 +1,6 @@
 swagger: '2.0'
 
-basePath: '/'
+basePath: '/v1/'
 
 info:
   title: wort
@@ -45,6 +45,19 @@ paths:
           description: Signature
         404:
           description: Database not supported
+  '/auth/tokens':
+    post:
+      summary: Request a new access token for API use
+      operationId: wort.blueprints.api.tokens.get_token
+      responses:
+        200:
+          description: token created
+    delete:
+      summary: Deactivate an access token
+      operationId: wort.blueprints.api.tokens.revoke_token
+      responses:
+        200:
+          description: token revoked
 
 parameters:
   sra_id:

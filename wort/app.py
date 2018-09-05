@@ -20,7 +20,7 @@ def create_celery_app(app=None):
     :param app: Flask app
     :return: Celery app
     """
-    app = app or create_app()
+    app = app or create_app().app
 
     celery = Celery(
         app.import_name,
@@ -66,7 +66,7 @@ def blueprints(app):
     app.register_blueprint(compute)
     app.register_blueprint(submit)
     app.register_blueprint(viewer)
-    app.register_blueprint(api, url_prefix="/api")
+    app.register_blueprint(api, url_prefix="/v1/auth")
 
 
 def extensions(app):
