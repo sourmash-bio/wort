@@ -24,14 +24,15 @@
                                                           +---------------+
 ```
 
-Three routes:
-- /compute/<sra_id>
+Three routes (swagger description: [`wort/api.yaml`](../wort/api.yaml)):
+
+- /v1/compute/<sra_id>
   - defined in [`wort.blueprints.compute.views`][4]
   - starts the celery task [`compute`][5] (defined in [`wort.blueprints.compute.tasks`][6])
     * checks if the file already exists in S3, stop if it does.
 	* if not, run a shell script (`fastq-dump + sourmash`)
 	* after finishing successfully, upload the file to S3
-- /viewer/<sra_id>
+- /v1/viewer/<sra_id>
   - defined in [`wort.blueprints.viewer.views`][7]
   - shows a signature (calculated from the SRA)
   - for now just generating a [pre-signed URL from S3][8] and redirecting
@@ -39,7 +40,7 @@ Three routes:
   - raw JSON is not very friendly,
     how to make it pretty but still support programmatic access to the JSON file
 	and display HTML if in browser?
-- /submit
+- /v1/submit
   - entry point for submitting signatures. It must do:
     * validation
 	  - is this a signature?

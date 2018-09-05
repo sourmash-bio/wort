@@ -66,7 +66,7 @@ def blueprints(app):
     app.register_blueprint(compute)
     app.register_blueprint(submit)
     app.register_blueprint(viewer)
-    app.register_blueprint(api, url_prefix="/v1/auth")
+    app.register_blueprint(api)
 
 
 def extensions(app):
