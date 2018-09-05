@@ -5,3 +5,7 @@ iam/
 integration/
 letsencrypt_certs/
 *.swp
+admin/
+Cargo.lock
+target/
+fabfile.py

@@ -1,0 +1,13 @@
+[package]
+name = "wort"
+version = "0.1.0"
+authors = ["Luiz Irber <luiz.irber@gmail.com>"]
+description = "Command line client for the wort API"
+repository = "https://github.com/dib-lab/wort"
+keywords = ["minhash", "bioinformatics"]
+categories = ["science"]
+license = "BSD-3-Clause"
+
+[dependencies]
+clap = { version = "~2.32", features = ["yaml"] }
+reqwest = "0.8"
