@@ -1,4 +1,4 @@
-from flask import Flask
+import connexion
 
 from celery import Celery
 
@@ -20,7 +20,7 @@ def create_celery_app(app=None):
     :param app: Flask app
     :return: Celery app
     """
-    app = app or create_app()
+    app = app or create_app().app
 
     celery = Celery(
         app.import_name,
@@ -47,21 +47,26 @@ def create_app(settings_override=None):
     :param settings_override: Override settings
     :return: Flask app
     """
-    app = Flask(__name__, instance_relative_config=True)
+    app = connexion.App(__name__, swagger_ui=True, swagger_json=True)
+    app.add_api("api.yaml")
 
-    app.config.from_object("config.settings")
+    app.app.config.from_object("config.settings")
 
     if settings_override:
         app.config.update(settings_override)
 
+    blueprints(app.app)
+    extensions(app.app)
+
+    return app
+
+
+def blueprints(app):
     app.register_blueprint(errors)
     app.register_blueprint(compute)
     app.register_blueprint(submit)
     app.register_blueprint(viewer)
-    app.register_blueprint(api, url_prefix="/api")
-    extensions(app)
-
-    return app
+    app.register_blueprint(api)
 
 
 def extensions(app):
