@@ -1,5 +1,5 @@
 name: wort
-version: "0.1.0"
+version: "0.2.0"
 about: Interact with the wort API from the command line
 author: Luiz Irber <wort@luizirber.org>
 
@@ -7,7 +7,7 @@ settings:
     - ArgRequiredElseHelp
 
 subcommands:
-    - viewer:
+    - view:
         about: view a signature
         settings:
             - ArgRequiredElseHelp
@@ -23,3 +23,30 @@ subcommands:
             - dataset_id:
                 help: ID of the dataset in the DB
                 index: 1
+    - submit:
+        about: submit a signature
+        settings:
+            - ArgRequiredElseHelp
+        args:
+            - token:
+                short: t
+                help: user name
+                required: true
+                takes_value: true
+            - database:
+                short: d
+                help: database id
+                takes_value: true
+                default_value: sra
+                possible_values:
+                  - img
+                  - sra
+            - dataset_id:
+                short: i
+                help: ID of the dataset in the DB
+                required: true
+                takes_value: true
+            - signature:
+                help: sourmash signature file
+                index: 1
+                required: true
