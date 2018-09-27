@@ -58,6 +58,16 @@ paths:
       responses:
         200:
           description: token revoked
+  '/submit/{public_db}/{dataset_id}':
+    post:
+      summary: Submit a signature
+      operationId: wort.blueprints.submit.views.submit_sigs
+      parameters:
+        - $ref: '#/parameters/public_db'
+        - $ref: '#/parameters/dataset_id'
+      responses:
+        202:
+          description: Signature accepted
 
 parameters:
   sra_id:
