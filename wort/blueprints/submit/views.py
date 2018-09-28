@@ -32,7 +32,7 @@ def submit_sigs(public_db, dataset_id):
         Body=compressed_fp.getvalue(),
         Bucket=f"wort-submitted-{public_db}",
         Key=key,
-        ContentType="binary/octet-stream",
+        ContentType="application/json",
         ContentEncoding="gzip",
     )
 
