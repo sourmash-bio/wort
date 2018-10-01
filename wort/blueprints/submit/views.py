@@ -23,13 +23,17 @@ def submit_sigs(public_db, dataset_id):
     key = f"{username}/{dataset_id}.sig"
 
     file = request.files["file"]
-    compressed_fp = BytesIO()
-    # TODO: if it's already gzipped, don't compress it
-    with gzip.GzipFile(fileobj=compressed_fp, mode="wb") as gz:
-        shutil.copyfileobj(file.stream, gz)
+    if any(f == file.content_type for f in ("application/gzip", "application/x-gzip")):
+        # if it's already gzipped, don't compress it
+        compressed = file.stream
+    else:
+        compressed_fp = BytesIO()
+        with gzip.GzipFile(fileobj=compressed_fp, mode="wb") as gz:
+            shutil.copyfileobj(file.stream, gz)
+        compressed = compressed_fp.getvalue()
 
     conn.put_object(
-        Body=compressed_fp.getvalue(),
+        Body=compressed,
         Bucket=f"wort-submitted-{public_db}",
         Key=key,
         ContentType="application/json",

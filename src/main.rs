@@ -3,10 +3,16 @@ extern crate clap;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
+extern crate flate2;
 
 use std::error::Error;
+use std::fs::File;
+use std::io::{BufReader, Read};
 
 use clap::App;
+use flate2::bufread::GzEncoder;
+use flate2::Compression;
+use reqwest::multipart::{Form, Part};
 
 const BASEURL: &'static str = "https://wort.oxli.org/v1";
 
@@ -23,7 +29,15 @@ fn view(db: &str, dataset_id: &str) -> Result<(), Box<Error>> {
 }
 
 fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result<(), Box<Error>> {
-    let form = reqwest::multipart::Form::new().file("file", filename)?;
+    TODO: gzip compress before sending
+    let f = std::fs::File::open(filename)?;
+    let b = BufReader::new(f);
+    let mut gz = GzEncoder::new(b, Compression::best());
+    let mut buf = Vec::new();
+    gz.read_to_end(&mut buf)?;
+    let file = Part::reader(&buf[..]).mime_str("application/gzip")?;
+
+    let form = Form::new().part("file", file);
 
     let url = format!("{}/submit/{}/{}", BASEURL, db, dataset_id);
 
