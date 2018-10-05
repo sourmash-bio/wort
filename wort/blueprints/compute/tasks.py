@@ -3,7 +3,7 @@ from io import BytesIO
 import os
 from subprocess import CalledProcessError
 import shutil
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import NamedTemporaryFile
 
 from celery.exceptions import Ignore
 
@@ -56,23 +56,17 @@ def compute(sra_id):
 
         f.seek(0)
 
-        # TODO: compress using gzip here!
-        # TODO: need to fix those already in S3 first...
-        # compressed_fp = BytesIO()
-        # with gzip.GzipFile(fileobj=compressed_fp, mode="wb") as gz:
-        #    shutil.copyfileobj(f, gz)
+        compressed_fp = BytesIO()
+        with gzip.GzipFile(fileobj=compressed_fp, mode="wb") as gz:
+            shutil.copyfileobj(f, gz)
 
-        # conn.put_object(
-        #    Body=compressed_fp.getvalue(),
-        #    Bucket="wort-sra",
-        #    Key=key_path,
-        #    ContentType="text/plain",
-        #    ContentEncoding="gzip",
-        # )
-
-        # save to S3
-        key = s3.Object("wort-sra", key_path)
-        key.upload_fileobj(f)
+        conn.put_object(
+            Body=compressed_fp.getvalue(),
+            Bucket="wort-sra",
+            Key=key_path,
+            ContentType="application/json",
+            ContentEncoding="gzip",
+        )
 
 
 @celery.task
