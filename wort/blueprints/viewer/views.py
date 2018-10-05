@@ -14,20 +14,14 @@ def view_s3(public_db, dataset_id):
     conn = boto3.client("s3")
 
     key = f"sigs/{dataset_id}.sig"
-    # TODO: we don't really need this, I just copied the signatures improperly
-    # to the bucket...
-    if public_db == "img":
-        key = f"{dataset_id}.sig"
 
-    url = conn.generate_presigned_url(
-        "get_object",
-        Params={
-            "Bucket": f"wort-{public_db}",
-            "Key": key,
-            "ResponseContentType": "application/json",
-            # 'ResponseContentEncoding': 'gzip',
-        },
-        ExpiresIn=100,
-    )
+    params = {
+        "Bucket": f"wort-{public_db}",
+        "Key": key,
+        "ResponseContentType": "application/json",
+        "ResponseContentEncoding": "gzip",
+    }
+
+    url = conn.generate_presigned_url("get_object", Params=params, ExpiresIn=100)
 
     return redirect(url)

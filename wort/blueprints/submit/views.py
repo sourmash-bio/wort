@@ -1,26 +1,39 @@
-from flask import Blueprint, request, jsonify, flash
+import gzip
+from io import BytesIO
+import shutil
+
+from flask import Blueprint, request, jsonify, g
+from wort.blueprints.api.auth import token_auth
+
 
 submit = Blueprint("submit", __name__, template_folder="templates")
 
 
-@submit.route("/submit", methods=["GET", "POST"])
-def submit_sigs():
-    if request.method == "POST":
-        if "file" not in request.files:
-            flash("No file part")
-            return redirect(request.url)
+@token_auth.login_required
+def submit_sigs(public_db, dataset_id):
 
-        f = request.files["file"]
-        print(f, request.form["public_url"])
-        return jsonify({}), 200
+    if public_db not in ("sra", "img"):
+        return "Database not supported", 404
 
-    return """
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=text name=public_url>
-         <input type=submit value=Upload>
-    </form>
-    """
+    import boto3
+
+    conn = boto3.client("s3")
+
+    username = g.current_user.username
+    key = f"{username}/{dataset_id}.sig"
+
+    file = request.files["file"]
+    compressed_fp = BytesIO()
+    # TODO: if it's already gzipped, don't compress it
+    with gzip.GzipFile(fileobj=compressed_fp, mode="wb") as gz:
+        shutil.copyfileobj(file.stream, gz)
+
+    conn.put_object(
+        Body=compressed_fp.getvalue(),
+        Bucket=f"wort-submitted-{public_db}",
+        Key=key,
+        ContentType="application/json",
+        ContentEncoding="gzip",
+    )
+
+    return jsonify({"status": "Signature accepted"}), 202

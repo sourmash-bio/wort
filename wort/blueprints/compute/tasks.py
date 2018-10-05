@@ -1,6 +1,9 @@
+import gzip
+from io import BytesIO
 import os
 from subprocess import CalledProcessError
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+import shutil
+from tempfile import NamedTemporaryFile
 
 from celery.exceptions import Ignore
 
@@ -15,6 +18,7 @@ def compute(sra_id):
     import botocore
     from snakemake import shell
 
+    conn = boto3.client("s3")
     s3 = boto3.resource("s3")
 
     key_path = os.path.join("sigs", sra_id + ".sig")
@@ -50,12 +54,19 @@ def compute(sra_id):
             if e.returncode != 141:
                 raise e
 
-        # save to S3
-        key = s3.Object("wort-sra", key_path)
         f.seek(0)
-        # TODO: compress using gzip here!
-        # https://gist.github.com/veselosky/9427faa38cee75cd8e27
-        key.upload_fileobj(f)
+
+        compressed_fp = BytesIO()
+        with gzip.GzipFile(fileobj=compressed_fp, mode="wb") as gz:
+            shutil.copyfileobj(f, gz)
+
+        conn.put_object(
+            Body=compressed_fp.getvalue(),
+            Bucket="wort-sra",
+            Key=key_path,
+            ContentType="application/json",
+            ContentEncoding="gzip",
+        )
 
 
 @celery.task
