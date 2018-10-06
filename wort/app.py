@@ -1,3 +1,5 @@
+from flask import jsonify
+
 import connexion
 
 from celery import Celery
@@ -57,6 +59,10 @@ def create_app(settings_override=None):
 
     blueprints(app.app)
     extensions(app.app)
+
+    @app.route("/")
+    def index():
+        return jsonify({"key": "Hello World"})
 
     return app
 
