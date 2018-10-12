@@ -10,7 +10,7 @@ from wort.blueprints.viewer import viewer
 from wort.blueprints.api import api
 from wort.blueprints.errors import errors
 
-from wort.ext import login, db, migrate
+from wort.ext import login, db, migrate, cache
 
 CELERY_TASK_LIST = ["wort.blueprints.compute.tasks"]
 
@@ -84,5 +84,6 @@ def extensions(app):
     login.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
+    app.cache = cache
 
     return None
