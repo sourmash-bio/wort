@@ -27,6 +27,7 @@ ipython = "*"
 httpie = "*"
 requests = "*"
 black = "*"
+awscli = "*"
 
 [pipenv]
 allow_prereleases = true
