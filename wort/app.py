@@ -49,7 +49,7 @@ def create_app(settings_override=None):
     :param settings_override: Override settings
     :return: Flask app
     """
-    app = connexion.App(__name__, swagger_ui=True, swagger_json=True)
+    app = connexion.App(__name__, options={"swagger_ui": True, "serve_spec": True})
     app.add_api("api.yaml")
 
     app.app.config.from_object("config.settings")
