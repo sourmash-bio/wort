@@ -19,6 +19,7 @@ flask-httpauth = "*"
 pycurl = "*"
 connexion = {version = "==2.0.0", extras = ["swagger-ui"]}
 jsonschema = "==2.6.0"
+flask-shell-ipython = "*"
 
 [dev-packages]
 flit = "==0.13"
