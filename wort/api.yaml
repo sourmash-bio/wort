@@ -1,27 +1,18 @@
-swagger: '2.0'
+openapi: 3.0.0
 
-basePath: '/v1/'
+servers:
+  - url: /v1/
 
 info:
   title: wort
   version: 0.0.1
-  description: https://github.com/dib-lab/wort
+  description: 'https://github.com/dib-lab/wort'
   contact:
     name: Luiz Irber
     email: wort@luizirber.org
   license:
     name: BSD 3-Clause
-    url: https://raw.githubusercontent.com/dib-lab/wort/master/LICENSE
-
-schemes:
-  - https
-  - http
-
-consumes:
-  - application/json
-
-produces:
-  - application/json
+    url: 'https://raw.githubusercontent.com/dib-lab/wort/master/LICENSE'
 
 paths:
   '/compute/sra/{sra_id}':
@@ -29,66 +20,79 @@ paths:
       summary: Request to compute a new signature from an SRA dataset
       operationId: wort.blueprints.compute.views.compute_sra
       parameters:
-        - $ref: '#/parameters/sra_id'
+        - $ref: '#/components/parameters/sra_id'
+      security:
+        - bearerAuth: []
       responses:
-        202:
+        '202':
           description: Compute task accepted
+
   '/view/{public_db}/{dataset_id}':
     get:
       summary: Return a signature
       operationId: wort.blueprints.viewer.views.view_s3
       parameters:
-        - $ref: '#/parameters/public_db'
-        - $ref: '#/parameters/dataset_id'
+        - $ref: '#/components/parameters/public_db'
+        - $ref: '#/components/parameters/dataset_id'
       responses:
-        200:
+        '200':
           description: Signature
-        404:
+        '404':
           description: Database not supported
-  '/auth/tokens':
+
+  /auth/tokens:
     post:
       summary: Request a new access token for API use
       operationId: wort.blueprints.api.tokens.get_token
       responses:
-        200:
+        '200':
           description: token created
     delete:
       summary: Deactivate an access token
       operationId: wort.blueprints.api.tokens.revoke_token
       responses:
-        200:
+        '200':
           description: token revoked
+
   '/submit/{public_db}/{dataset_id}':
     post:
       summary: Submit a signature
       operationId: wort.blueprints.submit.views.submit_sigs
       parameters:
-        - $ref: '#/parameters/public_db'
-        - $ref: '#/parameters/dataset_id'
+        - $ref: '#/components/parameters/public_db'
+        - $ref: '#/components/parameters/dataset_id'
       responses:
-        202:
+        '202':
           description: Signature accepted
 
-parameters:
-  sra_id:
-    name: sra_id
-    description: SRA ID for a dataset
-    in: path
-    required: true
-    type: string
-    pattern: "\\w{3}\\d{7}"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    sra_id:
+      name: sra_id
+      description: SRA ID for a dataset
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '\w{3}\d{7}'
 
-  public_db:
-    name: public_db
-    description: Public database
-    in: path
-    required: true
-    type: string
-    pattern: "sra|img"
+    public_db:
+      name: public_db
+      description: Public database
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: sra|img
 
-  dataset_id:
-    name: dataset_id
-    description: ID for a dataset in a public database
-    in: path
-    required: true
-    type: string
+    dataset_id:
+      name: dataset_id
+      description: ID for a dataset in a public database
+      in: path
+      required: true
+      schema:
+        type: string 
