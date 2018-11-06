@@ -21,8 +21,6 @@ paths:
       operationId: wort.blueprints.compute.views.compute_sra
       parameters:
         - $ref: '#/components/parameters/sra_id'
-      security:
-        - bearerAuth: []
       responses:
         '202':
           description: Compute task accepted
@@ -66,10 +64,6 @@ paths:
           description: Signature accepted
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
   parameters:
     sra_id:
       name: sra_id
