@@ -19,6 +19,8 @@ paths:
     post:
       summary: Request to compute a new signature from an SRA dataset
       operationId: wort.blueprints.compute.views.compute_sra
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/sra_id'
       responses:
@@ -64,6 +66,11 @@ paths:
           description: Signature accepted
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
   parameters:
     sra_id:
       name: sra_id
