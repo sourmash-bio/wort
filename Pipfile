@@ -17,7 +17,7 @@ flask-login = "*"
 flask-httpauth = "*"
 "celery-s3" = "*"
 pycurl = "*"
-connexion = "*"
+connexion = "<2.0.0"
 jsonschema = "==2.6.0"
 
 [dev-packages]
