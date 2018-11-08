@@ -1,4 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-  <p>wort view info</p>
+  <p>One day there will be a better page here, but for now query signatures
+    directly at the address bar. The URL format is</p>
+  <p>https://wort.oxli.org/view/{db}/{dataset_id}</p>
+  <p>where
+    <ul>
+      <li>{db}: can be 'sra' or 'img'</li>
+      <li>{dataset_id}: depends on the database. For SRA it's the SRA Experiment
+      ID, and for IMG/M it's the taxon OID.</li>
+    </ul>
+  </p>
 {% endblock %}
