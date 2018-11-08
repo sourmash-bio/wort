@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, render_template, current_app, url_for
 
 import connexion
 
@@ -60,9 +60,35 @@ def create_app(settings_override=None):
     blueprints(app.app)
     extensions(app.app)
 
+    @app.route("/about/")
+    def about():
+        return render_template("about.html")
+
     @app.route("/")
     def index():
-        return jsonify({"key": "Hello World"})
+        return render_template("index.html")
+
+    @app.route("/view/")
+    def view_base():
+        return render_template("view_base.html")
+
+    @app.route("/view/<public_db>/<dataset_id>/")
+    def view(public_db=None, dataset_id=None):
+        dataset = current_app.cache.get(f"wort-{public_db}/sigs/{dataset_id}.sig")
+        if dataset:
+            dataset["name"] = dataset_id.upper()
+            dataset["db"] = public_db.upper()
+            dataset["link"] = f"/v1/view/{public_db}/{dataset_id}"
+            if public_db == "sra":
+                dataset[
+                    "metadata"
+                ] = f"https://trace.ncbi.nlm.nih.gov/Traces/sra/?run={dataset_id.upper()}"
+            elif public_db == "img":
+                dataset[
+                    "metadata"
+                ] = f"https://img.jgi.doe.gov/cgi-bin/m/main.cgi?section=TaxonDetail&page=taxonDetail&taxon_oid={dataset_id}"
+
+        return render_template("view.html", dataset=dataset)
 
     return app
 

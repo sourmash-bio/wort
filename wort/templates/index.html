@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+Welcome to wort! It's a database for sourmash signatures, currently focused on
+indexing microbial datasets from
+<a href='https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?'>NCBI Sequence Read Archive</a>
+and the <a href='https://img.jgi.doe.gov/'>JGI Integrated Microbial Genomes and Microbiomes</a> portals.
+</div>
+
+<div>
+Here are some example pages for these datasets:
+<ul>
+  <li>SRA: <a href='/view/sra/DRR013902/'>DRR013902</a></li>
+  <li>IMG: <a href='/view/img/2522125045'>2728369338</a></li>
+</ul>
+</div>
+
+{% endblock %}
