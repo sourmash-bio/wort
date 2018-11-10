@@ -1,0 +1,362 @@
+/* General style sheet */
+
+/* General */
+
+html {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  background-color: white;
+  text-align: justify;
+}
+
+html, body {
+  min-width: 18rem;
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+article {
+  line-height: 2rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+/* Headings */
+
+h1, h2, h3, nav {
+  line-height: 1;
+  text-align: left;
+  text-indent: 0;
+}
+
+h1, h2 { font-size: 2rem; }
+:not(header) > h1 { line-height:1.25; }
+h3 { font-size: 1.5rem; line-height: 1.25 }
+
+/* Stop subscripts and superscripts from changing the line height.
+   Courtesy of https://css-tricks.com/snippets/css/prevent-superscripts-and-subscripts-from-affecting-line-height/ */
+
+sup, sub {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.4em;
+}
+
+sub { 
+  top: 0.4em; 
+}
+
+/* Figures and images */
+
+img {
+  max-width: 100%;
+}
+
+/*
+  Set images to full width by default. This also stops
+  images from “jumping” during layout (which happens if only
+  max-width is set.
+*/
+main img {
+  width: 100%;
+}
+
+figure {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+figcaption {
+  font-size: 1rem;
+  font-style: oblique;
+  line-height: 1.5;
+  text-align: center;
+  font-weight: bold;
+}
+
+/*
+  Screenshots of windows with drop shadows don’t appear to take up 100%
+  of the width. Adjust them optically.
+*/
+.window-with-shadow > img {
+  max-width: 110%;
+  width: 110%;
+  margin-left: -5%;
+  margin-right: -5%;
+}
+
+/*
+  And also pull the figure captions up so that the margin doesn’t take the drop
+  shadow into consideration.
+*/
+.window-with-shadow > figcaption, .window-with-shadow > figcaption > p:first-of-type {
+  margin-top: -1rem;
+}
+
+/*
+  Don’t add additional space between an H3 and a figure that immediately follows
+  it to improve grouping.
+*/
+h3 + figure {
+  margin-top: 0;
+}
+
+/* For windows with shadow, tighten up the spacing even further. */
+h3 + figure.window-with-shadow {
+  margin-top: -0.5rem;
+}
+
+/* Specialisations */
+
+figure.half-width-flush-right {
+  width: 47.5%;
+  margin-left: 5%;
+  float: right; 
+  margin-top: 0.5rem; /* get the top to line up with text */
+  margin-bottom: 0;
+}
+
+/* Video */
+
+video, video[poster] { width: 100%; }
+figure > video { margin-bottom: 1rem; }
+
+/* Block quotes */
+
+blockquote {
+  margin-left: -1.3rem;
+  border-left: 0.3rem solid lightgray;
+  padding-left: 1rem;
+  font-style: italic;
+  color: slategray;
+}
+
+blockquote a {
+  color: slategray;
+}
+
+/* Code */
+
+pre {
+  background-color: lightpink;
+  border-radius: 1rem;
+  overflow: scroll;
+}
+
+.chroma {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Links */
+
+a {
+  color: #333;
+  /*text-decoration: none;*/
+}
+
+/* Lists */
+
+ol, ul {
+  padding-left: 0;
+  list-style-type: none;
+}
+
+li::marker {
+  font-size: 1.5rem;
+  color: darkgray;
+}
+
+/* Tables */
+
+/* Make tables display with striped row borders overflowing the flush left alignment of the text just like we do with lists and code blocks for consistency. */
+table {
+  width: 100%;
+  border-spacing: 0;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+th:first-of-type, td:first-of-type {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+th {
+  text-align: left;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid gray;
+}
+
+/* Hack to add space between thead and tbody (https://stackoverflow.com/a/10762599) */
+tbody::before
+{
+  content: '';
+  display: block;
+  height: 0.5rem;
+}
+
+/* Stripes */
+tr:nth-child(2n) {
+  background-color: #eee;
+}
+
+/* Special styles */
+
+/* Warnings */
+.important-warning {
+  /* Make any icons inside align properly to text flow. */
+  display: block;
+  align-items: center;
+
+  background-color: darkred;
+  color: white;
+  
+  border-radius: 1rem;
+  
+  /* Keep text flush left and bleed the background. */
+  padding: 1rem;
+  margin: 1rem;
+  /*margin-left: -3.5rem;
+  margin-right: -3.5rem;*/
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+.important-warning a {
+  color: white;
+}
+
+.warning-icon {
+  height: 5rem;
+  display: inline-block;
+  padding-left: 1rem;
+  margin-right: 1rem;
+  /* padding: 0; */
+}
+
+.warning-path {
+  fill: white;
+}
+
+/* Images */
+
+.hairline-border > img {
+  border: 1px solid gray;
+}
+
+/* Icons */
+
+header ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+header li {
+  float: left;
+}
+
+header li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 0.4em;
+  text-decoration: none;
+}
+
+/* Keyboard styles */
+kbd {
+  display: inline-block;
+  border-radius: 0.25rem;
+  background-color: #eee;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border: 1px solid lightgray;
+  line-height: 1.25rem;
+}
+
+/* Footer */
+
+footer {
+  /*border-top: 1px solid darkcyan;*/
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
+/* Break point: warning dialog touches the edges */
+
+@media (max-width: 752px) {
+  .important-warning {
+    border-radius: 0;
+  }
+}
+
+/* Break point: width is smaller than original layout width */
+
+@media (max-width: 740px) {
+  .mastodon-embed {
+    width: 100%;
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Break point: title goes to two lines: 580px. */
+
+/* Nothing yet. */
+
+/* Break point: narrow portrait viewports */
+
+@media (max-width: 420px) {
+  html {
+    font-size: 0.9rem;
+  }
+
+  html, body {
+    padding: 0.5rem;
+  }
+
+  /*
+  Remove the border radius so the background color of code blocks appears in
+  full bleed.
+  */
+  .chroma {
+    border-radius: 0;
+  }
+
+  /* Let the figure captions breath, even on images with shadows */
+  .window-with-shadow > figcaption, .window-with-shadow > figcaption > p:first-of-type {
+    margin-top: 0;
+  }
+
+  /* Sadly, there’s not enough room to make list text flush left. */
+  li { list-style-position: inside; }
+
+  /* Half-width images leave the text too narrow to read comfortably so revert to full-width. */
+  figure.half-width-flush-right {
+    width: 100%;
+    margin-left: inherit;
+  }
+
+  .important-warning {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .warning-icon {
+    height: 10rem;
+  }
+}

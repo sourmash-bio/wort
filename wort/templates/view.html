@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if dataset %}
+    <ul>
+      <li>Dataset: {{ dataset.name }} ({{ dataset.db }})</li>
+      <li><a href='{{ dataset.metadata }}'>Metadata</a></li>
+      <li><a href='{{ dataset.link }}'>Download link</a></li>
+      <li>IPFS hash (gzipped):<br/> <a href='https://cloudflare-ipfs.com/ipfs/{{ dataset.ipfs }}'>{{ dataset.ipfs }}</a></li>
+    </ul>
+  {% else %}
+    <p>Dataset not calculated yet</p>
+  {% endif %}
+{% endblock %}

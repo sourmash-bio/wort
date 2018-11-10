@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>wort</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" type="text/css" />
+</head>
+
+<body>
+
+        <header>
+           <ul>
+             <li><a href="{{ url_for('index') }}">wort</a></li>
+             <li><a href="{{ url_for('view_base') }}">view</a></li>
+             {# not ready yet
+             <li><a href="{{ url_for('/search') }}">search</a></li>
+             <li><a href="{{ url_for('/gather') }}">gather</a></li>
+             <li><a href="{{ url_for('about') }}">about</a></li>
+             <li><a href='#'>login</a></li>
+             #}
+          </ul>
+
+          <div class='important-warning'>
+            <p>Reminder: wort is very alpha, so
+            please be patient =] (and report issues/feature requests on
+            <a href='https://github.com/dib-lab/wort/issues/'> GitHub</a>
+            </p>
+          </div>
+
+        </header>
+
+        <article>
+        {% block content %}
+        {% endblock %}
+        <article>
+
+        <footer class="footer-menu">
+        </footer>
+
+</body>
+</html>
