@@ -2,13 +2,14 @@ from flask import request
 
 from . import errors
 from wort.ext import db
-from wort.blueprints.api.errors import error_response as api_error_response
+from wort.blueprints.auth.errors import error_response as api_error_response
 
 
 def wants_json_response():
-    return request.accept_mimetypes["application/json"] >= request.accept_mimetypes[
-        "text/html"
-    ]
+    return (
+        request.accept_mimetypes["application/json"]
+        >= request.accept_mimetypes["text/html"]
+    )
 
 
 @errors.errorhandler(404)

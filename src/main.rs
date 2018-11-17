@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate clap;
+extern crate dialoguer;
+extern crate keyring;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
@@ -7,8 +9,10 @@ extern crate serde_derive;
 use std::error::Error;
 
 use clap::App;
+use dialoguer::{Input, PasswordInput};
 
 const BASEURL: &'static str = "https://wort.oxli.org/v1";
+const SERVICENAME: &'static str = "wort";
 
 #[derive(Debug, Deserialize)]
 struct Response {
@@ -37,6 +41,25 @@ fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result
     Ok(())
 }
 
+fn get_remote_token(username: &str, password: &str) -> Result<String, Box<Error>> {
+    let client = reqwest::Client::new();
+
+    let url = format!("{}/auth/tokens", BASEURL);
+
+    let mut resp = client
+        .post(&url)
+        .basic_auth(username, Some(password))
+        .send()?;
+    let token = resp.text().unwrap();
+    println!("{:?}\n{:?}", resp, token);
+    Ok(token)
+}
+
+fn get_saved_token() -> Result<String, Box<Error>> {
+    let keyring = keyring::Keyring::new(&SERVICENAME, "token");
+    Ok(String::from(keyring.get_password()?))
+}
+
 fn main() -> Result<(), Box<Error>> {
     let yml = load_yaml!("wort.yml");
     let m = App::from_yaml(yml).get_matches();
@@ -51,12 +74,38 @@ fn main() -> Result<(), Box<Error>> {
         }
         Some("submit") => {
             let cmd = m.subcommand_matches("submit").unwrap();
+
+            let token = match cmd.value_of("token") {
+                Some(n) => n.into(),
+                None => get_saved_token()?,
+            };
+
             submit(
                 cmd.value_of("database").unwrap().into(),
                 cmd.value_of("dataset_id").unwrap().into(),
-                cmd.value_of("token").unwrap(),
+                &token,
                 cmd.value_of("signature").unwrap(),
             )
+        }
+        Some("login") => {
+            let cmd = m.subcommand_matches("login").unwrap();
+
+            let username: String = match cmd.value_of("username") {
+                Some(n) => n.into(),
+                None => Input::new().with_prompt("Username").interact()?,
+            };
+
+            let password: String = match cmd.value_of("password") {
+                Some(n) => n.into(),
+                None => PasswordInput::new().with_prompt("Password").interact()?,
+            };
+
+            let token = get_remote_token(&username, &password)?;
+
+            let keyring = keyring::Keyring::new(&SERVICENAME, "token");
+            keyring.set_password(&token)?;
+
+            Ok(())
         }
         None => Ok(()), // TODO: should be error
         _ => Ok(()),    // TODO: should be error

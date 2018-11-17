@@ -14,12 +14,12 @@ flask-wtf = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
 flask-login = "*"
-flask-httpauth = "*"
 "celery-s3" = "*"
 pycurl = "*"
-connexion = {editable = true, ref = "94686c09740ec46bfbcfdbb5c07a346ef869730b", git = "https://github.com/zalando/connexion.git", extras = ["swagger-ui"]}
+connexion = {extras = ["swagger-ui"],version = "==2.0.2"}
 jsonschema = "==2.6.0"
 flask-shell-ipython = "*"
+python-jose = {extras = ["cryptography"],version = "*"}
 
 [dev-packages]
 flit = "==0.13"
@@ -29,6 +29,7 @@ httpie = "*"
 requests = "*"
 black = "*"
 awscli = "*"
+pdoc = "*"
 
 [pipenv]
 allow_prereleases = true

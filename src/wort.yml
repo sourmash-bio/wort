@@ -4,7 +4,7 @@ about: Interact with the wort API from the command line
 author: Luiz Irber <wort@luizirber.org>
 
 settings:
-    - ArgRequiredElseHelp
+    - SubcommandRequiredElseHelp
 
 subcommands:
     - view:
@@ -31,7 +31,6 @@ subcommands:
             - token:
                 short: t
                 help: user name
-                required: true
                 takes_value: true
             - database:
                 short: d
@@ -50,3 +49,14 @@ subcommands:
                 help: sourmash signature file
                 index: 1
                 required: true
+    - login:
+        about: log in wort
+        args:
+            - username:
+                short: u
+                help: username
+                takes_value: true
+            - password:
+                short: p
+                help: password
+                takes_value: true
