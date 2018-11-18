@@ -1,6 +1,6 @@
 import time
 
-from flask import g, Blueprint
+from flask import g, Blueprint, current_app
 from jose import JWTError, jwt
 from werkzeug.exceptions import Unauthorized
 
@@ -13,7 +13,6 @@ auth = Blueprint("auth", __name__)
 
 
 JWT_ISSUER = "org.oxli.wort"
-JWT_SECRET = "change_this"
 JWT_LIFETIME_SECONDS = 600
 JWT_ALGORITHM = "HS256"
 
@@ -39,12 +38,16 @@ def generate_token():
         "sub": str(g.current_user.username),
     }
 
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return jwt.encode(
+        payload, current_app.config["JWT_SECRET"], algorithm=JWT_ALGORITHM
+    )
 
 
 def decode_token(token):
     try:
-        info = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        info = jwt.decode(
+            token, current_app.config["JWT_SECRET"], algorithms=[JWT_ALGORITHM]
+        )
         user = User.query.filter_by(username=info["sub"]).first()
         g.current_user = user
         return info

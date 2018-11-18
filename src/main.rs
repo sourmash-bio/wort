@@ -10,6 +10,7 @@ use std::error::Error;
 
 use clap::App;
 use dialoguer::{Input, PasswordInput};
+use reqwest::StatusCode;
 
 const BASEURL: &'static str = "https://wort.oxli.org/v1";
 const SERVICENAME: &'static str = "wort";
@@ -50,8 +51,14 @@ fn get_remote_token(username: &str, password: &str) -> Result<String, Box<Error>
         .post(&url)
         .basic_auth(username, Some(password))
         .send()?;
+
+    let status = resp.status();
+
+    if status == StatusCode::UNAUTHORIZED {
+        // TODO: return proper error
+    }
+
     let token = resp.text().unwrap();
-    println!("{:?}\n{:?}", resp, token);
     Ok(token)
 }
 
