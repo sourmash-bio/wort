@@ -44,6 +44,8 @@ paths:
     post:
       summary: Submit a signature
       operationId: wort.blueprints.submit.views.submit_sigs
+      security:
+        - jwt: []
       parameters:
         - $ref: '#/components/parameters/public_db'
         - $ref: '#/components/parameters/dataset_id'

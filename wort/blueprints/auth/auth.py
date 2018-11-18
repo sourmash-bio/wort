@@ -23,8 +23,8 @@ def basic_auth(username, password, required_scopes=None):
     if user is None:
         return False
 
-    g.current_user = user
     if user.check_password(password):
+        g.current_user = user
         return {"sub": username, "scope": ""}
     else:
         return None
@@ -36,7 +36,7 @@ def generate_token():
         "iss": JWT_ISSUER,
         "iat": int(timestamp),
         "exp": int(timestamp + JWT_LIFETIME_SECONDS),
-        "sub": str(g.current_user),
+        "sub": str(g.current_user.username),
     }
 
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -44,7 +44,10 @@ def generate_token():
 
 def decode_token(token):
     try:
-        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        info = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user = User.query.filter_by(username=info["sub"]).first()
+        g.current_user = user
+        return info
     except JWTError as e:
         raise Unauthorized from e
 
