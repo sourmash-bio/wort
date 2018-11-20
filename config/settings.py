@@ -4,8 +4,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "insecuredev")
 
-JWT_SECRET = os.environ.get("JWT_SECRET", "insecuredev")
-
 # Celery SQS
 CELERY_RESULT_BACKEND = "celery_s3.backends.S3Backend"
 

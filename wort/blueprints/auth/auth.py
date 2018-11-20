@@ -1,20 +1,15 @@
 import time
 
-from flask import g, Blueprint, current_app
-from jose import JWTError, jwt
+from flask import g, Blueprint, current_app, jsonify
 from werkzeug.exceptions import Unauthorized
 
 from wort.models import User
+from wort.ext import db
 
 from .errors import error_response
 
 
 auth = Blueprint("auth", __name__)
-
-
-JWT_ISSUER = "org.oxli.wort"
-JWT_LIFETIME_SECONDS = 600
-JWT_ALGORITHM = "HS256"
 
 
 def basic_auth(username, password, required_scopes=None):
@@ -29,31 +24,19 @@ def basic_auth(username, password, required_scopes=None):
         return None
 
 
-def generate_token():
-    timestamp = _current_timestamp()
-    payload = {
-        "iss": JWT_ISSUER,
-        "iat": int(timestamp),
-        "exp": int(timestamp + JWT_LIFETIME_SECONDS),
-        "sub": str(g.current_user.username),
-    }
-
-    return jwt.encode(
-        payload, current_app.config["JWT_SECRET"], algorithm=JWT_ALGORITHM
-    )
+def get_token():
+    token = g.current_user.get_token(expires_in=86400)
+    db.session.commit()
+    return token
 
 
-def decode_token(token):
-    try:
-        info = jwt.decode(
-            token, current_app.config["JWT_SECRET"], algorithms=[JWT_ALGORITHM]
-        )
-        user = User.query.filter_by(username=info["sub"]).first()
-        g.current_user = user
-        return info
-    except JWTError as e:
-        raise Unauthorized from e
+def verify_token(token):
+    g.current_user = User.check_token(token) if token else None
+    if g.current_user is not None:
+        return {"sub": g.current_user.username, "scope": ""}
 
 
-def _current_timestamp():
-    return int(time.time())
+def revoke_token():
+    g.current_user.get_token()
+    db.session.commit()
+    return jsonify({"status": "OK"}), 204
