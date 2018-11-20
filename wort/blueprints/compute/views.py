@@ -4,11 +4,7 @@ from flask import Blueprint, render_template, jsonify, url_for, current_app
 
 compute = Blueprint("compute", __name__, template_folder="templates")
 
-from wort.blueprints.api.auth import token_auth
 
-
-# @compute.route("/compute/sra/<sra_id>", methods=["POST"])
-@token_auth.login_required
 def compute_sra(sra_id):
     import boto3
     import botocore

@@ -3,13 +3,11 @@ from io import BytesIO
 import shutil
 
 from flask import Blueprint, request, jsonify, g
-from wort.blueprints.api.auth import token_auth
 
 
 submit = Blueprint("submit", __name__, template_folder="templates")
 
 
-@token_auth.login_required
 def submit_sigs(public_db, dataset_id):
 
     if public_db not in ("sra", "img"):

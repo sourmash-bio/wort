@@ -19,6 +19,8 @@ paths:
     post:
       summary: Request to compute a new signature from an SRA dataset
       operationId: wort.blueprints.compute.views.compute_sra
+      security:
+        - token: []
       parameters:
         - $ref: '#/components/parameters/sra_id'
       responses:
@@ -38,16 +40,25 @@ paths:
         '404':
           description: Database not supported
 
-  /auth/tokens:
+  '/auth/tokens':
     post:
       summary: Request a new access token for API use
-      operationId: wort.blueprints.api.tokens.get_token
+      operationId: wort.blueprints.auth.auth.get_token
       responses:
         '200':
-          description: token created
+          description: Access token
+          content:
+            'text/plain':
+              schema:
+                type: string
+      security:
+        - basic: []
     delete:
       summary: Deactivate an access token
-      operationId: wort.blueprints.api.tokens.revoke_token
+      operationId: wort.blueprints.auth.auth.revoke_token
+      security:
+        - basic: []
+        - token: []
       responses:
         '200':
           description: token revoked
@@ -56,6 +67,8 @@ paths:
     post:
       summary: Submit a signature
       operationId: wort.blueprints.submit.views.submit_sigs
+      security:
+        - token: []
       parameters:
         - $ref: '#/components/parameters/public_db'
         - $ref: '#/components/parameters/dataset_id'
@@ -64,6 +77,16 @@ paths:
           description: Signature accepted
 
 components:
+  securitySchemes:
+    token:
+      type: http
+      scheme: bearer
+      x-bearerInfoFunc: wort.blueprints.auth.auth.verify_token
+    basic:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: wort.blueprints.auth.auth.basic_auth
+
   parameters:
     sra_id:
       name: sra_id

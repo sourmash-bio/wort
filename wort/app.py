@@ -7,7 +7,7 @@ from celery import Celery
 from wort.blueprints.compute import compute
 from wort.blueprints.submit import submit
 from wort.blueprints.viewer import viewer
-from wort.blueprints.api import api
+from wort.blueprints.auth import auth
 from wort.blueprints.errors import errors
 
 from wort.ext import login, db, migrate, cache
@@ -98,7 +98,7 @@ def blueprints(app):
     app.register_blueprint(compute)
     app.register_blueprint(submit)
     app.register_blueprint(viewer)
-    app.register_blueprint(api)
+    app.register_blueprint(auth)
 
 
 def extensions(app):

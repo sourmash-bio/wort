@@ -14,10 +14,9 @@ flask-wtf = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
 flask-login = "*"
-flask-httpauth = "*"
 "celery-s3" = "*"
 pycurl = "*"
-connexion = {version = "==2.0.0", extras = ["swagger-ui"]}
+connexion = {extras = ["swagger-ui"],version = "==2.0.2"}
 jsonschema = "==2.6.0"
 flask-shell-ipython = "*"
 
@@ -29,6 +28,7 @@ httpie = "*"
 requests = "*"
 black = "*"
 awscli = "*"
+pdoc = "*"
 
 [pipenv]
 allow_prereleases = true
