@@ -1,16 +1,13 @@
-from flask import jsonify, render_template, current_app, url_for
-
 import connexion
-
 from celery import Celery
+from flask import current_app, jsonify, render_template, url_for
 
+from wort.blueprints.auth import auth
 from wort.blueprints.compute import compute
+from wort.blueprints.errors import errors
 from wort.blueprints.submit import submit
 from wort.blueprints.viewer import viewer
-from wort.blueprints.auth import auth
-from wort.blueprints.errors import errors
-
-from wort.ext import login, db, migrate, cache
+from wort.ext import cache, db, login, migrate
 
 CELERY_TASK_LIST = ["wort.blueprints.compute.tasks"]
 

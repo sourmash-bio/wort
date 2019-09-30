@@ -1,9 +1,8 @@
 import gzip
-from io import BytesIO
 import shutil
+from io import BytesIO
 
-from flask import Blueprint, request, jsonify, g
-
+from flask import Blueprint, g, jsonify, request
 
 submit = Blueprint("submit", __name__, template_folder="templates")
 

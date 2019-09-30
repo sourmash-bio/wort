@@ -1,13 +1,12 @@
 import time
 
-from flask import g, Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, g, jsonify
 from werkzeug.exceptions import Unauthorized
 
-from wort.models import User
 from wort.ext import db
+from wort.models import User
 
 from .errors import error_response
-
 
 auth = Blueprint("auth", __name__)
 

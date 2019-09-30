@@ -1,8 +1,8 @@
 import gzip
-from io import BytesIO
 import os
-from subprocess import CalledProcessError
 import shutil
+from io import BytesIO
+from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile
 
 from celery.exceptions import Ignore
