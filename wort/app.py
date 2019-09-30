@@ -5,6 +5,7 @@ from flask import current_app, jsonify, render_template, url_for
 from wort.blueprints.auth import auth
 from wort.blueprints.compute import compute
 from wort.blueprints.errors import errors
+from wort.blueprints.search import search
 from wort.blueprints.submit import submit
 from wort.blueprints.viewer import viewer
 from wort.ext import cache, db, login, migrate
@@ -96,6 +97,7 @@ def blueprints(app):
     app.register_blueprint(submit)
     app.register_blueprint(viewer)
     app.register_blueprint(auth)
+    app.register_blueprint(search)
 
 
 def extensions(app):

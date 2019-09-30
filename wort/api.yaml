@@ -76,6 +76,17 @@ paths:
         '202':
           description: Signature accepted
 
+  '/search/':
+    post:
+      summary: Submit a signature
+      operationId: wort.blueprints.search.views.search_genbank
+      security:
+        - token: []
+      responses:
+        '202':
+          description: Signature accepted
+
+
 components:
   securitySchemes:
     token:
