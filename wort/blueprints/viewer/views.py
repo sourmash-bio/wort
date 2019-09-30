@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, redirect
+from flask import Blueprint, jsonify, redirect, render_template
 
 viewer = Blueprint("viewer", __name__, template_folder="templates")
 

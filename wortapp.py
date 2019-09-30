@@ -1,6 +1,6 @@
 from wort.app import create_app
 from wort.ext import db
-from wort.models import User, Task
+from wort.models import Task, User
 
 app = create_app().app
 

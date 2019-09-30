@@ -1,8 +1,9 @@
 from flask import request
 
-from . import errors
-from wort.ext import db
 from wort.blueprints.auth.errors import error_response as api_error_response
+from wort.ext import db
+
+from . import errors
 
 
 def wants_json_response():

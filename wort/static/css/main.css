@@ -42,8 +42,8 @@ sup, sub {
   top: -0.4em;
 }
 
-sub { 
-  top: 0.4em; 
+sub {
+  top: 0.4em;
 }
 
 /* Figures and images */
@@ -113,7 +113,7 @@ h3 + figure.window-with-shadow {
 figure.half-width-flush-right {
   width: 47.5%;
   margin-left: 5%;
-  float: right; 
+  float: right;
   margin-top: 0.5rem; /* get the top to line up with text */
   margin-bottom: 0;
 }
@@ -217,9 +217,9 @@ tr:nth-child(2n) {
 
   background-color: darkred;
   color: white;
-  
+
   border-radius: 1rem;
-  
+
   /* Keep text flush left and bleed the background. */
   padding: 1rem;
   margin: 1rem;

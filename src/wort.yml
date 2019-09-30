@@ -13,7 +13,7 @@ subcommands:
             - ArgRequiredElseHelp
         args:
             - database:
-                short: d 
+                short: d
                 help: database id
                 takes_value: true
                 default_value: sra

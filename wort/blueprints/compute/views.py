@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, render_template, jsonify, url_for, current_app
+from flask import Blueprint, current_app, jsonify, render_template, url_for
 
 compute = Blueprint("compute", __name__, template_folder="templates")
 
