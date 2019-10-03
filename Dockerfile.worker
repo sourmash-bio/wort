@@ -17,7 +17,6 @@ RUN apt-get update && \
     find sratoolkit.2.8.2-1-ubuntu64 ! -type d ! -name "fastq-dump*" -a ! -name "*.kfg" -delete && \
     pip install pipenv && \
     pipenv install --system --deploy && \
-    pip install --pre sourmash==2.0.0a10 && \
     apt-get remove -y curl build-essential libssl-dev && \
     apt-get autoremove -y
 

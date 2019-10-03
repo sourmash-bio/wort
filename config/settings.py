@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -37,3 +38,5 @@ SQLALCHEMY_DATABASE_URI = os.path.expandvars(
     os.environ.get("DATABASE_URL", "sqlite:///" + os.path.join(basedir, "app.db"))
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+WORT_DATABASES_PATH = Path("databases/")

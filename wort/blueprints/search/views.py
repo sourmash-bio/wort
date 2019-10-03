@@ -1,3 +1,4 @@
+from base64 import b64encode
 import os
 
 from flask import Blueprint, render_template, jsonify, url_for, current_app
@@ -34,5 +35,6 @@ def search_genbank(signature):
         return jsonify({"status": "Signature already calculated"}), 202
 
     """
-    task = tasks.search_genbank(signature)
+    # TODO: save signature to S3, send only link?
+    task = tasks.search_genbank.delay(b64encode(signature.read()).decode("ascii"))
     return jsonify({"status": "Submitted", "task_id": task.id}), 202

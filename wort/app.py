@@ -10,7 +10,10 @@ from wort.blueprints.submit import submit
 from wort.blueprints.viewer import viewer
 from wort.ext import cache, db, login, migrate
 
-CELERY_TASK_LIST = ["wort.blueprints.compute.tasks"]
+CELERY_TASK_LIST = [
+    "wort.blueprints.compute.tasks",
+    "wort.blueprints.search.tasks"
+]
 
 
 def create_celery_app(app=None):
