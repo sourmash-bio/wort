@@ -12,7 +12,8 @@ use clap::App;
 use dialoguer::{Input, PasswordInput};
 use reqwest::StatusCode;
 
-const BASEURL: &'static str = "https://wort.oxli.org/v1";
+//const BASEURL: &'static str = "https://wort.oxli.org/v1";
+const BASEURL: &'static str = "http://127.0.0.1:5000/v1";
 const SERVICENAME: &'static str = "wort";
 
 #[derive(Debug, Deserialize)]
@@ -31,6 +32,21 @@ fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result
     let form = reqwest::multipart::Form::new().file("file", filename)?;
 
     let url = format!("{}/submit/{}/{}", BASEURL, db, dataset_id);
+
+    let client = reqwest::Client::new();
+    let mut res = client
+        .post(&url)
+        .bearer_auth(token)
+        .multipart(form)
+        .send()?;
+    println!("{}", res.json::<Response>()?.status);
+    Ok(())
+}
+
+fn search(index: String, filename: &str, token: &str) -> Result<(), Box<Error>> {
+    let form = reqwest::multipart::Form::new().file("signature", filename)?;
+
+    let url = format!("{}/search/{}/", BASEURL, index);
 
     let client = reqwest::Client::new();
     let mut res = client
@@ -92,6 +108,20 @@ fn main() -> Result<(), Box<Error>> {
                 cmd.value_of("dataset_id").unwrap().into(),
                 &token,
                 cmd.value_of("signature").unwrap(),
+            )
+        }
+        Some("search") => {
+            let cmd = m.subcommand_matches("search").unwrap();
+
+            let token = match cmd.value_of("token") {
+                Some(n) => n.into(),
+                None => get_saved_token()?,
+            };
+
+            search(
+                cmd.value_of("index").unwrap().into(),
+                cmd.value_of("signature").unwrap(),
+                &token,
             )
         }
         Some("login") => {

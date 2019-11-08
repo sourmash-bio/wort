@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, jsonify, url_for, current_app
 search = Blueprint("search", __name__, template_folder="templates")
 
 
-def search_genbank(signature):
+def search_dispatch(index, signature):
     import boto3
     import botocore
 
@@ -36,5 +36,8 @@ def search_genbank(signature):
 
     """
     # TODO: save signature to S3, send only link?
-    task = tasks.search_genbank.delay(b64encode(signature.read()).decode("ascii"))
+    task = tasks.search_genbank.apply_async(
+        args=[b64encode(signature.read()).decode("ascii")],
+        queue='search'
+    )
     return jsonify({"status": "Submitted", "task_id": task.id}), 202

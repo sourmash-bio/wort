@@ -17,6 +17,16 @@ services:
     image: wort-worker
     env_file:
       - iam/wort_s3.env
+    volumes:
+      - ../wort-databases:/home/user/databases
+    command: >
+      celery worker
+             -A wortapp.celery
+             --without-gossip
+             --without-mingle
+             --without-heartbeat
+             -l INFO -c 1
+             -Q search
 
   web:
     restart: always
@@ -31,8 +41,8 @@ services:
     environment:
       PYTHONUNBUFFERED: 'true'
       FLASK_APP: 'wortapp.py'
-    #ports:
-    #  - "5000:5000"
+    ports:
+      - "5000:5000"
     links:
       - db
     depends_on:

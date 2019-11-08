@@ -49,6 +49,27 @@ subcommands:
                 help: sourmash signature file
                 index: 1
                 required: true
+    - search:
+        about: search for similar datasets in an index
+        settings:
+            - ArgRequiredElseHelp
+        args:
+            - token:
+                short: t
+                help: user name
+                takes_value: true
+            - index:
+                short: i
+                help: A sourmash index
+                takes_value: true
+                default_value: genbank
+                possible_values:
+                  - genbank
+                  - refseq
+            - signature:
+                help: sourmash signature file
+                index: 1
+                required: true
     - login:
         about: log in wort
         args:

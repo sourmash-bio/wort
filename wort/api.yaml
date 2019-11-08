@@ -76,16 +76,26 @@ paths:
         '202':
           description: Signature accepted
 
-  '/search/':
+  '/search/{index}/':
     post:
-      summary: Submit a signature
-      operationId: wort.blueprints.search.views.search_genbank
+      summary: Search similar datasets in an index
+      operationId: wort.blueprints.search.views.search_dispatch
       security:
         - token: []
+      parameters:
+        - $ref: '#/components/parameters/index'
       responses:
         '202':
           description: Signature accepted
-
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                signature:
+                  type: string
+                  format: binary
 
 components:
   securitySchemes:
@@ -124,3 +134,12 @@ components:
       required: true
       schema:
         type: string
+
+    index:
+      name: index
+      description: A precalculated sourmash index
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: genbank|refseq

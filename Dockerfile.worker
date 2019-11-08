@@ -30,5 +30,6 @@ RUN echo '/repository/user/cache-disabled = "true"' > .ncbi/user-settings.mkfg
 
 COPY wort wort
 COPY config config
+COPY wortapp.py wortapp.py
 
 CMD celery -A wort.blueprints.compute.tasks --without-gossip --without-mingle --without-heartbeat -l INFO -c 1 worker

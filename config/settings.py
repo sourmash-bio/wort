@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "insecuredev")
@@ -34,9 +35,16 @@ BROKER_TRANSPORT_OPTIONS = {
 
 BROKER_HEARTBEAT = None
 
+TASK_ROUTES = {
+    'wort.blueprints.search.tasks.*': {'queue': 'search'},
+    'wort.blueprints.compute.tasks.*': {'queue': 'compute'},
+}
+
+# SQL Alchemy
 SQLALCHEMY_DATABASE_URI = os.path.expandvars(
     os.environ.get("DATABASE_URL", "sqlite:///" + os.path.join(basedir, "app.db"))
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+# wort search configs
 WORT_DATABASES_PATH = Path("databases/")
