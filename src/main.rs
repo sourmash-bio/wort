@@ -13,22 +13,22 @@ use dialoguer::{Input, PasswordInput};
 use reqwest::StatusCode;
 
 //const BASEURL: &'static str = "https://wort.oxli.org/v1";
-const BASEURL: &'static str = "http://127.0.0.1:5000/v1";
-const SERVICENAME: &'static str = "wort";
+const BASEURL: &str = "http://127.0.0.1:5000/v1";
+const SERVICENAME: &str = "wort";
 
 #[derive(Debug, Deserialize)]
 struct Response {
     status: String,
 }
 
-fn view(db: &str, dataset_id: &str) -> Result<(), Box<Error>> {
+fn view(db: &str, dataset_id: &str) -> Result<(), Box<dyn Error>> {
     let url = format!("{}/view/{}/{}", BASEURL, db, dataset_id);
     let mut res = reqwest::get(&url)?;
     std::io::copy(&mut res, &mut std::io::stdout())?;
     Ok(())
 }
 
-fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result<(), Box<Error>> {
+fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result<(), Box<dyn Error>> {
     let form = reqwest::multipart::Form::new().file("file", filename)?;
 
     let url = format!("{}/submit/{}/{}", BASEURL, db, dataset_id);
@@ -43,7 +43,7 @@ fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result
     Ok(())
 }
 
-fn search(index: String, filename: &str, token: &str) -> Result<(), Box<Error>> {
+fn search(index: String, filename: &str, token: &str) -> Result<(), Box<dyn Error>> {
     let form = reqwest::multipart::Form::new().file("signature", filename)?;
 
     let url = format!("{}/search/{}/", BASEURL, index);
@@ -58,7 +58,7 @@ fn search(index: String, filename: &str, token: &str) -> Result<(), Box<Error>> 
     Ok(())
 }
 
-fn get_remote_token(username: &str, password: &str) -> Result<String, Box<Error>> {
+fn get_remote_token(username: &str, password: &str) -> Result<String, Box<dyn Error>> {
     let client = reqwest::Client::new();
 
     let url = format!("{}/auth/tokens", BASEURL);
@@ -78,12 +78,12 @@ fn get_remote_token(username: &str, password: &str) -> Result<String, Box<Error>
     Ok(token)
 }
 
-fn get_saved_token() -> Result<String, Box<Error>> {
+fn get_saved_token() -> Result<String, Box<dyn Error>> {
     let keyring = keyring::Keyring::new(&SERVICENAME, "token");
-    Ok(String::from(keyring.get_password()?))
+    Ok(keyring.get_password()?)
 }
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let yml = load_yaml!("wort.yml");
     let m = App::from_yaml(yml).get_matches();
 
