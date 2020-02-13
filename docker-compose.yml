@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      gunicorn -b 0.0.0.0:5000
+      gunicorn -b 0.0.0.0:5050
         --access-logfile -
         --reload
         "wort.app:create_app()"
@@ -42,7 +42,7 @@ services:
       PYTHONUNBUFFERED: 'true'
       FLASK_APP: 'wortapp.py'
     ports:
-      - "5000:5000"
+      - "5050:5050"
     links:
       - db
     depends_on:

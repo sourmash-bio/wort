@@ -1,18 +1,11 @@
-#[macro_use]
-extern crate clap;
-extern crate dialoguer;
-extern crate keyring;
-extern crate reqwest;
-#[macro_use]
-extern crate serde_derive;
-
 use std::error::Error;
 
-use clap::App;
+use clap::{load_yaml, App};
 use dialoguer::{Input, PasswordInput};
 use reqwest::StatusCode;
+use serde::Deserialize;
 
-//const BASEURL: &'static str = "https://wort.oxli.org/v1";
+//const BASEURL: &str = "https://wort.oxli.org/v1";
 const BASEURL: &str = "http://127.0.0.1:5000/v1";
 const SERVICENAME: &str = "wort";
 
@@ -28,7 +21,12 @@ fn view(db: &str, dataset_id: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn submit(db: String, dataset_id: String, token: &str, filename: &str) -> Result<(), Box<dyn Error>> {
+fn submit(
+    db: String,
+    dataset_id: String,
+    token: &str,
+    filename: &str,
+) -> Result<(), Box<dyn Error>> {
     let form = reqwest::multipart::Form::new().file("file", filename)?;
 
     let url = format!("{}/submit/{}/{}", BASEURL, db, dataset_id);
