@@ -1,0 +1,34 @@
+{
+  "name": "wort",
+  "description": "TODO",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "sapper dev",
+    "build": "sapper build",
+    "export": "sapper export",
+    "start": "node __sapper__/build",
+    "cy:run": "cypress run",
+    "cy:open": "cypress open",
+    "test": "run-p --race dev cy:run"
+  },
+  "dependencies": {
+    "compression": "^1.7.1",
+    "polka": "next",
+    "sirv": "^0.4.0"
+  },
+  "devDependencies": {
+    "@okrad/svelte-progressbar": "^1.3.1",
+    "fasta-parser": "^0.1.0",
+    "fastqstream": "^0.1.0",
+    "filestream": "^5.0.0",
+    "npm-run-all": "^4.1.5",
+    "peek-stream": "^1.1.3",
+    "pumpify": "^2.0.0",
+    "sapper": "^0.27.0",
+    "sourmash": "file:../../sourmash/pkg",
+    "svelte": "^3.0.0",
+    "svelte-loader": "^2.9.0",
+    "through2": "^3.0.1",
+    "webpack": "^4.7.0"
+  }
+}

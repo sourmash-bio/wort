@@ -9,3 +9,12 @@ admin/
 Cargo.lock
 target/
 fabfile.py
+.tox
+
+frontend/.DS_Store
+frontend/node_modules/
+frontend/src/node_modules/@sapper/
+frontend/yarn-error.log
+frontend/cypress/screenshots/
+frontend/__sapper__/
+frontend/.env
