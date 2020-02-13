@@ -52,10 +52,10 @@
 </svelte:head>
 
 <figure class="warning">
-<p>Reminder: wort is very alpha, so
-  please be patient =] (and report issues/feature requests on
-  <a href='https://github.com/dib-lab/wort/issues/'> GitHub</a>
-</p>
+  <p>Reminder: wort is very alpha, so please be patient =]</p>
+  <p>(and report issues/feature requests on
+    <a href='https://github.com/dib-lab/wort/issues/'> GitHub</a>
+  </p>
 </figure>
 
 <p>

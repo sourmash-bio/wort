@@ -1,6 +1,6 @@
 <script context="module">
 	export async function preload({ params, query }) {
-		const res = await this.fetch(`view/sra/${params.dataset_id}.json`);
+		const res = await this.fetch(`v1/info/sra/${params.dataset_id}.json`);
 		const data = await res.json();
 
 		if (res.status === 200) {

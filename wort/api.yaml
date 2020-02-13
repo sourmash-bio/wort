@@ -40,6 +40,19 @@ paths:
         '404':
           description: Database not supported
 
+  '/info/{public_db}/{dataset_id}.json':
+    get:
+      summary: Return a signature info
+      operationId: wort.blueprints.viewer.views.info
+      parameters:
+        - $ref: '#/components/parameters/public_db'
+        - $ref: '#/components/parameters/dataset_id'
+      responses:
+        '200':
+          description: Signature info
+        '404':
+          description: Database not supported
+
   '/auth/tokens':
     post:
       summary: Request a new access token for API use
