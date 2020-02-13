@@ -1,7 +1,7 @@
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.contrib.cache import RedisCache
+from cachelib import RedisCache
 
 login = LoginManager()
 
