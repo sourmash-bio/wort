@@ -1,6 +1,6 @@
 <script context="module">
 	export async function preload({ params, query }) {
-		const res = await this.fetch(`view/img/${params.dataset_id}.json`);
+		const res = await this.fetch(`v1/info/img/${params.dataset_id}.json`);
 		const data = await res.json();
 
 		if (res.status === 200) {

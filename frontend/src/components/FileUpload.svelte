@@ -20,7 +20,6 @@
     values.forEach((v, i) => {if (bar) {bar.updatePerc(v, i)}});
   };
 
-  //var mh = new sourmash.KmerMinHash(1,1,false,42,0,false);
   async function downloadFile(url, destFilePath) {
     let source = await fetch(url).body;
     let sink = fs.createWriteStream(destFilePath, { mode: 0o755 });
@@ -45,8 +44,8 @@
     }
 
     let sourmash = await sourmash_lib
-    //var mh = new sourmash.KmerMinHash(10, 21, false, 42, 0, true)
-    var mh = new sourmash.Signature()
+    var mh = new sourmash.KmerMinHash(10, 21, false, 42, 0, true)
+    //var mh = new sourmash.Signature()
 
     var fqstream = new FASTQStream()
     var validate = new FASTQValidator()

@@ -29,8 +29,9 @@ def view_s3(public_db, dataset_id):
 
 # @viewer.route("/info/<db>/<dataset_id>.json")
 def info(public_db, dataset_id):
-    dataset = current_app.cache.get(f"wort-{public_db}/sigs/{dataset_id}.sig")
-    if dataset:
+    available = current_app.cache.get(f"wort-{public_db}/sigs/{dataset_id}.sig")
+    if available:
+        dataset = {}
         dataset["name"] = dataset_id.upper()
         dataset["db"] = public_db.upper()
         dataset["link"] = f"/v1/view/{public_db}/{dataset_id}"

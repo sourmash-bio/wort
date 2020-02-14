@@ -18,6 +18,16 @@ services:
     env_file:
       - iam/wort_s3.env
 
+  app:
+    command: sh -c 'npm install && npm run build && node __sapper__/build'
+    expose: ['3000']
+    image: node:12.6.0-alpine
+    restart: always
+    volumes:
+      - './frontend:/app'
+      - './frontend/node_modules:/app/node_modules/'
+    working_dir: /app
+
   web:
     restart: always
     build:

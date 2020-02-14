@@ -55,9 +55,7 @@
 <nav>
 	<ul>
 		<li><a class='{segment === undefined ? "selected" : ""}' href='.'>home</a></li>
-		<!-- for the view link, we're using rel=prefetch so that Sapper prefetches
-		     the view data when we hover over the link or tap it on a touchscreen -->
-		<li><a rel=prefetch class='{segment === "view" ? "selected" : ""}' href='view'>view</a></li>
+		<li><a class='{segment === "view" ? "selected" : ""}' href='view'>view</a></li>
 		<li><a class='{segment === "compute" ? "selected" : ""}' href='compute'>compute</a></li>
 	</ul>
 </nav>

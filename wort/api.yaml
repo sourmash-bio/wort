@@ -108,7 +108,7 @@ components:
       required: true
       schema:
         type: string
-        pattern: '\w{3}\d{7}'
+        pattern: '\w{3}\d{6,7}'
 
     public_db:
       name: public_db

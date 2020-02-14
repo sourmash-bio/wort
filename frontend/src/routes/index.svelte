@@ -67,8 +67,8 @@ and the <a href='https://img.jgi.doe.gov/'>JGI Integrated Microbial Genomes and 
 
 <p> Here are some example pages for these datasets: </p>
 <ul>
-  <li>SRA: <a href='/view/sra/DRR013902/'>DRR013902</a></li>
-  <li>IMG: <a href='/view/img/2522125045'>2728369338</a></li>
+  <li>SRA: <a rel=nofollow href='/view/sra/DRR013902/'>DRR013902</a></li>
+  <li>IMG: <a rel=nofollow href='/view/img/2522125045/'>2522125045</a></li>
 </ul>
 
 <p>For more info check the <a href='https://github.com/luizirber/2018-biods'>poster</a>
