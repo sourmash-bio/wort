@@ -1,12 +1,3 @@
-# build sra-toolkit 2.8.2-1 and requirements
-FROM python:3.8.3-slim-buster AS sratoolkit_build
-
-RUN apt-get update && \
-    apt-get install -y curl && \
-    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.2-1/sratoolkit.2.8.2-1-ubuntu64.tar.gz && \
-    tar xf sratoolkit.tar.gz
-
-# Prepare the worker container
 FROM python:3.8.3-slim-buster
 
 RUN groupadd user && \
@@ -17,23 +8,40 @@ WORKDIR /home/user
 ADD Pipfile Pipfile.lock ./
 
 RUN apt-get update && \
-    apt-get install -y libpq-dev build-essential libcurl4-openssl-dev libssl-dev curl && \
+    apt-get install -y build-essential libcurl4-openssl-dev libssl-dev curl && \
     pip install pipenv && \
     pipenv install --system --deploy && \
     pip install sourmash==3.3.0 && \
-    apt-get remove -y libpq-dev curl build-essential libssl-dev && \
-    apt-get autoremove -y
+    pip cache purge && \
+    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.7/sratoolkit.2.10.7-ubuntu64.tar.gz && \
+    tar xf sratoolkit.tar.gz && \
+    rm sratoolkit.tar.gz && \
+    apt-get remove -y curl build-essential libssl-dev && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt && \
+    pip uninstall -y numpy scipy matplotlib pipenv
 
-RUN mkdir -p /home/user/bin
-COPY --from=sratoolkit_build sratoolkit.2.8.2-1-ubuntu64/bin/fastq-dump /home/user/bin/fastq-dump
-
-ENV PATH $PATH:/home/user/bin/
+ENV PATH $PATH:/home/user/sratoolkit.2.10.7-ubuntu64/bin
 
 USER user
 
 # Configure sra-toolkit to disable cache
 RUN mkdir .ncbi
-RUN echo '/repository/user/cache-disabled = "true"' > .ncbi/user-settings.mkfg
+
+RUN echo '## auto-generated configuration file - DO NOT EDIT ##''' >> .ncbi/user-settings.mkfg
+RUN echo '' >> .ncbi/user-settings.mkfg
+RUN echo '/LIBS/GUID = "7737545d-30d4-4d05-875a-2c562df521d5"' >> .ncbi/user-settings.mkfg
+RUN echo '/config/default = "false"' >> .ncbi/user-settings.mkfg
+RUN echo '/libs/cloud/accept_aws_charges = "false"' >> .ncbi/user-settings.mkfg
+RUN echo '/libs/cloud/report_instance_identity = "true"' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/ad/public/apps/file/volumes/flatAd = "."' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/ad/public/apps/refseq/volumes/refseqAd = "."' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/ad/public/apps/sra/volumes/sraAd = "."' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/ad/public/apps/sraPileup/volumes/ad = "."' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/ad/public/apps/sraRealign/volumes/ad = "."' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/ad/public/root = "."' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/default-path = "/root/ncbi"' >> .ncbi/user-settings.mkfg
+RUN echo '/repository/user/main/public/cache-disabled = "true"' >> .ncbi/user-settings.mkfg
 
 COPY wort wort
 COPY config config

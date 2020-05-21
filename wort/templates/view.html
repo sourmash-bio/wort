@@ -5,7 +5,9 @@
       <li>Dataset: {{ dataset.name }} ({{ dataset.db }})</li>
       <li><a href='{{ dataset.metadata }}'>Metadata</a></li>
       <li><a href='{{ dataset.link }}'>Download link</a></li>
+      {% if dataset.ipfs %}
       <li>IPFS hash (gzipped):<br/> <a href='https://cloudflare-ipfs.com/ipfs/{{ dataset.ipfs }}'>{{ dataset.ipfs }}</a></li>
+      {% endif %}
     </ul>
   {% else %}
     <p>Dataset not calculated yet</p>

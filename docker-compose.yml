@@ -6,7 +6,7 @@ services:
     restart: always
     image: postgres:9.6-alpine
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./data/postgres-data:/var/lib/postgresql/data
     env_file:
       - env.production
 
@@ -68,4 +68,4 @@ services:
     ports:
       - "6379"
     volumes:
-      - ./redis:/data
+      - ./data/redis:/data

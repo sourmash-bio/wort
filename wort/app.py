@@ -73,17 +73,29 @@ def create_app(settings_override=None):
     def view(public_db=None, dataset_id=None):
         dataset = current_app.cache.get(f"wort-{public_db}/sigs/{dataset_id}.sig")
         if dataset:
-            dataset["name"] = dataset_id.upper()
-            dataset["db"] = public_db.upper()
-            dataset["link"] = f"/v1/view/{public_db}/{dataset_id}"
-            if public_db == "sra":
-                dataset[
-                    "metadata"
-                ] = f"https://trace.ncbi.nlm.nih.gov/Traces/sra/?run={dataset_id.upper()}"
-            elif public_db == "img":
-                dataset[
-                    "metadata"
-                ] = f"https://img.jgi.doe.gov/cgi-bin/m/main.cgi?section=TaxonDetail&page=taxonDetail&taxon_oid={dataset_id}"
+            if isinstance(dataset, bool):
+                # This was generated in the compute view, fix it to be a dict
+                dataset = {}
+                dataset["name"] = dataset_id.upper()
+                dataset["db"] = public_db.upper()
+                dataset["link"] = f"/v1/view/{public_db}/{dataset_id}"
+                if public_db == "sra":
+                    dataset[
+                        "metadata"
+                    ] = f"https://trace.ncbi.nlm.nih.gov/Traces/sra/?run={dataset_id.upper()}"
+                elif public_db == "img":
+                    dataset[
+                        "metadata"
+                    ] = f"https://img.jgi.doe.gov/cgi-bin/m/main.cgi?section=TaxonDetail&page=taxonDetail&taxon_oid={dataset_id}"
+                current_app.cache.set(f"wort-{public_db}/sigs/{dataset_id}.sig", dataset)
+        else:
+            # TODO: is it really missing, or cache wasn't set up properly?
+            # this is especially true for IMG, since there is no point in code
+            # setting the cache for it.
+            #
+            # S3 check for file is one option, but very easy to get a very large
+            # bill if someone start requesting spurious datasets...
+            pass
 
         return render_template("view.html", dataset=dataset)
 
