@@ -1,2 +1,8 @@
-redis
-postgres-data
+# ignore everything
+**
+
+# except
+!/wort/
+!Pipfile.lock
+!Pipfile
+!config/
