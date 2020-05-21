@@ -2,7 +2,9 @@
 **
 
 # except
-!/wort/
+!wort/
 !Pipfile.lock
 !Pipfile
 !config/
+!wortapp.py
+!pyproject.toml
