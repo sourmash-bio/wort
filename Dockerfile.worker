@@ -1,3 +1,8 @@
+# Build decoct
+FROM rust:1-slim-buster as builder
+RUN cargo install --git https://github.com/luizirber/decoct --branch latest
+
+# Build worker image
 FROM python:3.8.3-slim-buster
 
 RUN groupadd user && \
@@ -11,7 +16,6 @@ RUN apt-get update && \
     apt-get install -y build-essential libcurl4-openssl-dev libssl-dev curl && \
     pip install pipenv && \
     pipenv install --system --deploy && \
-    pip install sourmash==3.3.0 && \
     pip cache purge && \
     curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.7/sratoolkit.2.10.7-ubuntu64.tar.gz && \
     tar xf sratoolkit.tar.gz && \
@@ -19,9 +23,11 @@ RUN apt-get update && \
     apt-get remove -y curl build-essential libssl-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt && \
-    pip uninstall -y numpy scipy matplotlib pipenv
+    pip uninstall -y pipenv
 
 ENV PATH $PATH:/home/user/sratoolkit.2.10.7-ubuntu64/bin
+
+COPY --from=builder /usr/local/cargo/bin/decoct /usr/local/bin/sourmash
 
 USER user
 
@@ -46,4 +52,5 @@ RUN echo '/repository/user/main/public/cache-disabled = "true"' >> .ncbi/user-se
 COPY wort wort
 COPY config config
 
+ENV RAYON_NUM_THREADS 3
 CMD celery -A wort.blueprints.compute.tasks --without-gossip --without-mingle --without-heartbeat -l INFO -c 1 worker
