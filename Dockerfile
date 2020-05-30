@@ -1,4 +1,4 @@
-FROM python:3.7.1-slim-stretch
+FROM python:3.8.3-slim-buster
 
 RUN groupadd user && \
     useradd --create-home --home-dir /home/user -g user -s /bin/bash user
