@@ -49,6 +49,27 @@ subcommands:
                 help: sourmash signature file
                 index: 1
                 required: true
+    - compute:
+        about: request a signature to be computed
+        settings:
+            - ArgRequiredElseHelp
+        args:
+            - token:
+                short: t
+                help: user name
+                takes_value: true
+            - database:
+                short: d
+                help: database id
+                takes_value: true
+                default_value: sra
+                possible_values:
+                  - img
+                  - sra
+            - dataset_id:
+                help: ID of the dataset in the DB
+                required: true
+                takes_value: true
     - login:
         about: log in wort
         args:
