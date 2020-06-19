@@ -9,10 +9,13 @@ ADD Pipfile Pipfile.lock wortapp.py pyproject.toml ./
 
 RUN pip install pipenv flit
 RUN apt-get update && \
-    apt-get install -y build-essential libcurl4-openssl-dev libssl-dev && \
+    apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev && \
     pipenv install --system --deploy && \
+    pip cache purge && \
     apt-get remove -y build-essential libssl-dev && \
-    apt-get autoremove -y
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt && \
+    pip uninstall -y pipenv
 
 COPY wort wort
 COPY config config
