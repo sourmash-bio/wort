@@ -1,6 +1,6 @@
 # Build decoct
 FROM rust:1-slim-buster as builder
-RUN cargo install --git https://github.com/luizirber/decoct --branch latest
+RUN cargo install --git https://github.com/luizirber/decoct --rev 2be907d
 
 # Build worker image
 FROM python:3.8.3-slim-buster
@@ -14,8 +14,8 @@ ADD Pipfile Pipfile.lock ./
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev curl && \
-    pip install pipenv && \
-    pipenv install --system --deploy && \
+    pip install micropipenv[toml]==0.3.0 && \
+    micropipenv install --method pipenv --deploy && \
     pip cache purge && \
     curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.7/sratoolkit.2.10.7-ubuntu64.tar.gz && \
     tar xf sratoolkit.tar.gz && \
@@ -23,7 +23,7 @@ RUN apt-get update && \
     apt-get remove -y curl build-essential libssl-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt && \
-    pip uninstall -y pipenv
+    pip uninstall -y micropipenv
 
 ENV PATH $PATH:/home/user/sratoolkit.2.10.7-ubuntu64/bin
 
