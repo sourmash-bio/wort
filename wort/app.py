@@ -8,6 +8,7 @@ from wort.blueprints.errors import errors
 from wort.blueprints.submit import submit
 from wort.blueprints.viewer import viewer
 from wort.ext import cache, db, login, migrate
+from wort.models import Database, Dataset
 
 CELERY_TASK_LIST = ["wort.blueprints.compute.tasks"]
 
@@ -71,35 +72,26 @@ def create_app(settings_override=None):
 
     @app.route("/view/<public_db>/<dataset_id>/")
     def view(public_db=None, dataset_id=None):
-        dataset = current_app.cache.get(f"wort-{public_db}/sigs/{dataset_id}.sig")
-        if dataset:
-            if isinstance(dataset, bool):
-                # This was generated in the compute view, fix it to be a dict
-                dataset = {}
+        dataset_info = current_app.cache.get(f"{public_db}/{dataset_id}")
 
-            dataset["name"] = dataset_id.upper()
-            dataset["db"] = public_db.upper()
-            dataset["link"] = f"/v1/view/{public_db}/{dataset_id}"
-            if public_db == "sra":
-                dataset[
-                    "metadata"
-                ] = f"https://trace.ncbi.nlm.nih.gov/Traces/sra/?run={dataset_id.upper()}"
-            elif public_db == "img":
-                dataset[
-                    "metadata"
-                ] = f"https://img.jgi.doe.gov/cgi-bin/m/main.cgi?section=TaxonDetail&page=taxonDetail&taxon_oid={dataset_id}"
+        if dataset_info is None:
+            # Not in cache, let's check DB
+            dataset = Dataset.query.filter_by(id=dataset_id).first()
 
-            current_app.cache.set(f"wort-{public_db}/sigs/{dataset_id}.sig", dataset)
-        else:
-            # TODO: is it really missing, or cache wasn't set up properly?
-            # this is especially true for IMG, since there is no point in code
-            # setting the cache for it.
-            #
-            # S3 check for file is one option, but very easy to get a very large
-            # bill if someone start requesting spurious datasets...
-            pass
+            if dataset is not None:
+                # Found a hit in DB
+                dataset_info = {}
+                if dataset.ipfs is not None:
+                    # only show if IPFS hash is available
+                    dataset_info["name"] = dataset_id.upper()
+                    dataset_info["db"] = public_db.upper()
+                    dataset_info["link"] = f"/v1/view/{public_db}/{dataset_id}"
+                    dataset_info["metadata"] = dataset.database.metadata_link.format(dataset=dataset_id)
+                    dataset_info["ipfs"] = dataset.ipfs
+                    # let's update cache
+                    current_app.cache.set(f"{public_db}/{dataset_id}", dataset_info)
 
-        return render_template("view.html", dataset=dataset)
+        return render_template("view.html", dataset=dataset_info)
 
     return app
 

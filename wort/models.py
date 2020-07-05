@@ -70,4 +70,4 @@ class Dataset(db.Model):
     id = db.Column(db.String(20), primary_key=True, index=True, unique=True)
     database_id = db.Column(db.String(20), db.ForeignKey("database.id"))
     size_MB = db.Column(db.Integer, nullable=True)
-    ipfs = db.Column(db.String(48), nullable=True)
+    ipfs = db.Column(db.String(60), nullable=True)
