@@ -17,6 +17,11 @@ services:
     image: wort-worker
     env_file:
       - iam/wort_s3.env
+    command: >
+      celery -A wort.blueprints.compute.tasks
+             -Q compute_small,compute_medium,compute_large
+             --without-gossip --without-mingle --without-heartbeat
+             -l INFO -c 1 worker
 
   web:
     restart: always
