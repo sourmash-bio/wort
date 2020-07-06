@@ -34,7 +34,7 @@ def compute_sra(sra_id):
         return jsonify({"status": "Signature already calculated"}), 202
 
     # Not computed yet, send to proper queue
-    if dataset.size_MB < 300:
+    if dataset.size_MB <= 300:
         queue = "compute_small"
     elif dataset.size_MB > 300 and dataset.size_MB < 1600:
         queue = "compute_medium"
