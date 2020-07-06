@@ -58,3 +58,16 @@ class Task(db.Model):
     name = db.Column(db.String(128), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     complete = db.Column(db.Boolean, default=False)
+
+
+class Database(db.Model):
+    id = db.Column(db.String(20), primary_key=True, index=True, unique=True)
+    metadata_link = db.Column(db.String(128), nullable=False)
+    datasets = db.relationship("Dataset", backref="database", lazy="dynamic")
+
+
+class Dataset(db.Model):
+    id = db.Column(db.String(20), primary_key=True, index=True, unique=True)
+    database_id = db.Column(db.String(20), db.ForeignKey("database.id"))
+    size_MB = db.Column(db.Integer, nullable=True)
+    ipfs = db.Column(db.String(60), nullable=True)
