@@ -1,6 +1,7 @@
 import connexion
 from celery import Celery
 from flask import current_app, jsonify, render_template, url_for
+from sqlalchemy import func
 
 from wort.blueprints.auth import auth
 from wort.blueprints.compute import compute
@@ -64,7 +65,18 @@ def create_app(settings_override=None):
 
     @app.route("/")
     def index():
-        return render_template("index.html")
+        n_datasets = current_app.cache.get(f"meta/n_datasets")
+        if n_datasets is None:
+            n_datasets = Dataset.query.filter(Dataset.ipfs.isnot(None)).count()
+            current_app.cache.set(f"meta/n_datasets", n_datasets, timeout=86400)
+
+        size_TB = current_app.cache.get(f"meta/size_TB")
+        if size_TB is None:
+            size_TB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).filter(Dataset.ipfs.isnot(None)).first()[0]
+            size_TB = int(size_TB / 1000.)
+            current_app.cache.set(f"meta/size_TB", size_TB, timeout=86400)
+
+        return render_template("index.html", n_datasets=n_datasets, size_TB=size_TB)
 
     @app.route("/view/")
     def view_base():
