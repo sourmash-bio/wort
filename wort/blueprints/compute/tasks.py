@@ -98,7 +98,7 @@ def compute_genomes(accession, path, name):
                f"sourmash compute -k 21,31,51 "
                 "  --scaled 1000 "
                 "  --track-abundance "
-                "  --name '{name}' "
+                "  --name {name:q} "
                 "  -o {f.name} "
                 "  <(curl {path})"
             )
