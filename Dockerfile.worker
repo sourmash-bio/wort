@@ -20,7 +20,7 @@ RUN apt-get update && \
     curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.7/sratoolkit.2.10.7-ubuntu64.tar.gz && \
     tar xf sratoolkit.tar.gz && \
     rm sratoolkit.tar.gz && \
-    apt-get remove -y curl build-essential libssl-dev && \
+    apt-get remove -y build-essential libssl-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt && \
     pip uninstall -y micropipenv
