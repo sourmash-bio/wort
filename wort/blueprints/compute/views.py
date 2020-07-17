@@ -43,3 +43,31 @@ def compute_sra(sra_id):
 
     task = tasks.compute.apply_async(args=[sra_id], queue=queue)
     return jsonify({"status": "Submitted", "task_id": task.id}), 202
+
+
+def compute_genomes(assembly_accession):
+    from . import tasks
+
+    dataset = Dataset.query.filter_by(id=assembly_accession).first()
+    if dataset is None:
+        # We don't have information about it, how to query GenBank/RefSeq for
+        # info?
+        return jsonify({"status": "Metadata not available"}), 404
+
+    is_computed = dataset.ipfs is not None
+    if is_computed:
+        return jsonify({"status": "Signature already calculated"}), 202
+
+    # Not computed yet, send to proper queue
+    if dataset.size_MB <= 300:
+        queue = "compute_small"
+    elif dataset.size_MB > 300 and dataset.size_MB < 1600:
+        queue = "compute_medium"
+    else:
+        queue = "compute_large"
+
+    task = tasks.compute_genomes.apply_async(
+        args=[dataset.id, dataset.path, dataset.name],
+        queue="genomes")
+#        queue=queue)
+    return jsonify({"status": "Submitted", "task_id": task.id}), 202

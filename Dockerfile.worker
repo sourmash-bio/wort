@@ -1,6 +1,6 @@
 # Build decoct
 FROM rust:1-slim-buster as builder
-RUN cargo install --git https://github.com/luizirber/decoct --rev 96dee1d
+RUN cargo install --git https://github.com/luizirber/decoct --rev 2d3f980cbfd64b028adf34620cc33ff501814a6b
 
 # Build worker image
 FROM python:3.8.3-slim-buster
@@ -20,7 +20,7 @@ RUN apt-get update && \
     curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.7/sratoolkit.2.10.7-ubuntu64.tar.gz && \
     tar xf sratoolkit.tar.gz && \
     rm sratoolkit.tar.gz && \
-    apt-get remove -y curl build-essential libssl-dev && \
+    apt-get remove -y build-essential libssl-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt && \
     pip uninstall -y micropipenv
@@ -53,4 +53,4 @@ COPY wort wort
 COPY config config
 
 ENV RAYON_NUM_THREADS 3
-CMD celery -A wort.blueprints.compute.tasks -Q compute_small,compute_medium --without-gossip --without-mingle --without-heartbeat -l INFO -c 1 worker
+CMD celery -A wort.blueprints.compute.tasks -Q compute_small,compute_medium,genomes --without-gossip --without-mingle --without-heartbeat -l INFO -c 1 worker

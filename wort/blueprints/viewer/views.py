@@ -6,7 +6,7 @@ viewer = Blueprint("viewer", __name__, template_folder="templates")
 # @viewer.route("/view/<db>/<dataset_id>")
 def view_s3(public_db, dataset_id):
 
-    if public_db not in ("sra", "img"):
+    if public_db not in ("sra", "img", "genomes"):
         return "Database not supported", 404
 
     import boto3

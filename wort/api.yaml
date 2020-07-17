@@ -27,6 +27,18 @@ paths:
         '202':
           description: Compute task accepted
 
+  '/compute/genomes/{assembly_accession}':
+    post:
+      summary: Request to compute a new signature from a GenBank/RefSeq dataset
+      operationId: wort.blueprints.compute.views.compute_genomes
+      security:
+        - token: []
+      parameters:
+        - $ref: '#/components/parameters/assembly_accession'
+      responses:
+        '202':
+          description: Compute task accepted
+
   '/view/{public_db}/{dataset_id}':
     get:
       summary: Return a signature
@@ -95,7 +107,16 @@ components:
       required: true
       schema:
         type: string
-        pattern: '\w{3}\d{6,8}'
+        pattern: '^\w{3}\d{6,8}$'
+
+    assembly_accession:
+      name: assembly_accession
+      description: Accession number for a GenBank/RefSeq dataset
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^\w{3}_\d{9}\.\d{1,2}$'
 
     public_db:
       name: public_db
@@ -104,7 +125,7 @@ components:
       required: true
       schema:
         type: string
-        pattern: sra|img
+        pattern: "^sra|^img|^genomes"
 
     dataset_id:
       name: dataset_id
