@@ -71,5 +71,5 @@ class Dataset(db.Model):
     database_id = db.Column(db.String(20), db.ForeignKey("database.id"))
     size_MB = db.Column(db.Integer, nullable=True)
     ipfs = db.Column(db.String(60), nullable=True)
-    path = db.Column(db.String(240), nullable=True)
-    name = db.Column(db.String(128), nullable=True)
+    path = db.Column(db.String(340), nullable=True)
+    name = db.Column(db.String(160), nullable=True)
