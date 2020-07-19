@@ -1,0 +1,4 @@
+# m h  dom mon dow   command
+0 5 * * 1 cd ~/wort && /usr/local/bin/docker-compose run --rm letsencrypt renew && /usr/local/bin/docker-compose restart proxy
+0 17 * * *  cd ~/wort/machine/wort-web && ./download_daily_sra.sh 
+0 5 * * * cd ~/wort && /usr/local/bin/docker-compose exec -T web flask shell -c '%run -i machine/wort-web/add_ipfs_mapping_db.py'
