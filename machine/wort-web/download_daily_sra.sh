@@ -14,8 +14,8 @@ wget -O ${output} 'http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&
 
 wget -O ${output_metagenomes} 'http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=("'${day_slash}'"[PDAT] : "'${day_slash}'"[PDAT]) NOT amplicon[All Fields] AND "METAGENOMIC"[Source]'
 
-/usr/local/bin/docker-compose exec -T web flask shell -c "%run -i integrations/add_dataset_info.py integrations/${output}"
+/usr/local/bin/docker-compose exec -T web flask shell -c "%run -i machine/wort-web/add_dataset_info.py machine/wort-web/${output}"
 /home/ubuntu/.local/bin/pipenv run python submit.py ${output} | tee logs/`date +%Y%m%d_%H%M`.submitted
 
-/usr/local/bin/docker-compose exec -T web flask shell -c "%run -i integrations/add_dataset_info.py integrations/${output_metagenomes}"
+/usr/local/bin/docker-compose exec -T web flask shell -c "%run -i machine/wort-web/add_dataset_info.py machine/wort-web/${output_metagenomes}"
 /home/ubuntu/.local/bin/pipenv run python submit.py ${output_metagenomes} | tee logs_metagenomes/`date +%Y%m%d_%H%M`.submitted
