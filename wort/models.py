@@ -73,3 +73,4 @@ class Dataset(db.Model):
     ipfs = db.Column(db.String(60), nullable=True)
     path = db.Column(db.String(340), nullable=True)
     name = db.Column(db.String(160), nullable=True)
+    computed = db.Column(db.DateTime, nullable=True)

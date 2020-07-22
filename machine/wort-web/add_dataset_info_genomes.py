@@ -1,8 +1,14 @@
 import csv
 import gzip
+import os
 import sys
 
+import boto3
+import botocore
 import requests
+
+conn = boto3.client("s3")
+s3 = boto3.resource("s3")
 
 
 def build_link(accession, asm_name):
@@ -104,9 +110,30 @@ with requests.Session() as s:
                 db.session.add(new_dataset)
                 n += 1
             else:
-                # TODO: dataset is in DB, do we want to update it?
+                updated = False
+                # dataset is in DB, do we want to update it?
+                if dataset_in_db.computed is None:
+                    acc = row["assembly_accession"]
+                    # check on S3
+                    key_path = os.path.join("sigs", acc + ".sig")
+                    try:
+                        obj = s3.Object("wort-genomes", key_path)
+                        obj.load()
+                    except botocore.exceptions.ClientError as e:
+                        if e.response["Error"]["Code"] == "404":
+                            pass  # Object does not exist yet
+                        else:
+                            # Something else has gone wrong
+                            raise
+                    else:
+                        # The key already exists, update compute field in DB
+                        dataset_in_db.computed = obj.last_modified
+                        db.session.add(dataset_in_db)
+                        updated = True
+
                 # If it was updated, invalidate cache
-                pass
+                if updated:
+                    app.cache.delete(f"genomes/{acc}")
 
             if (n % 100 == 0) and (n != 0):
                 # Avoid committing all at once?

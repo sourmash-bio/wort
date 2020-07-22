@@ -29,8 +29,7 @@ def compute_sra(sra_id):
         db.session.add(dataset)
         db.session.commit()
 
-    is_computed = dataset.ipfs is not None
-    if is_computed:
+    if dataset.computed is not None:
         return jsonify({"status": "Signature already calculated"}), 202
 
     # Not computed yet, send to proper queue
@@ -54,8 +53,7 @@ def compute_genomes(assembly_accession):
         # info?
         return jsonify({"status": "Metadata not available"}), 404
 
-    is_computed = dataset.ipfs is not None
-    if is_computed:
+    if dataset.computed is not None:
         return jsonify({"status": "Signature already calculated"}), 202
 
     # Not computed yet, send to proper queue
