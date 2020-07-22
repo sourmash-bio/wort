@@ -1,7 +1,7 @@
 from glob import glob
 
 n = 0
-for hashes in glob("integrations/hashes/wort_hashes*"):
+for hashes in reversed(glob("machine/wort-web/hashes/wort_hashes*")):
     with open(hashes, 'r') as fp:
         for line in fp:
             try:

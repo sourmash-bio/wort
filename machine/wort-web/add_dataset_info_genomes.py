@@ -23,9 +23,9 @@ def crawl_link(accession, session):
     req = session.get(url)
     if req.status_code == 200:
         # try to read the right accession name
-        for line in req.text.iter_lines():
+        for line in req.text.split('\n'):
             if line.startswith(f'<a href="{accession}_'):
-                asm_name = line.split('"')[1][:-1])
+                asm_name = line.split('"')[1][:-1]
                 break
     # TODO: check for 5xx
 
@@ -73,7 +73,7 @@ with requests.Session() as s:
                 if check_r.status_code == 404:
                     # Error with this path, let's try to crawl instead
                     try:
-                        path = crawl_link(accession, s)
+                        path = crawl_link(row['assembly_accession'], s)
                     except ValueError:
                         # Can't find this data, continue...
                         continue
