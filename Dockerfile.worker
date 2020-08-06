@@ -1,6 +1,6 @@
 # Build decoct
 FROM rust:1-slim-buster as builder
-RUN cargo install --git https://github.com/luizirber/decoct --rev 2d3f980cbfd64b028adf34620cc33ff501814a6b
+RUN cargo install --git https://github.com/luizirber/decoct --rev 630f5a773e6df22a33dafc3d744e39735c055328
 
 # Build worker image
 FROM python:3.8.3-slim-buster
@@ -17,7 +17,7 @@ RUN apt-get update && \
     pip install micropipenv[toml]==0.3.0 && \
     micropipenv install --method pipenv --deploy && \
     pip cache purge && \
-    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.7/sratoolkit.2.10.7-ubuntu64.tar.gz && \
+    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.8/sratoolkit.2.10.8-ubuntu64.tar.gz && \
     tar xf sratoolkit.tar.gz && \
     rm sratoolkit.tar.gz && \
     apt-get remove -y build-essential libssl-dev && \
@@ -25,7 +25,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt && \
     pip uninstall -y micropipenv
 
-ENV PATH $PATH:/home/user/sratoolkit.2.10.7-ubuntu64/bin
+ENV PATH $PATH:/home/user/sratoolkit.2.10.8-ubuntu64/bin
 
 COPY --from=builder /usr/local/cargo/bin/decoct /usr/local/bin/sourmash
 
