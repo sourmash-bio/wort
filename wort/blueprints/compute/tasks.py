@@ -38,7 +38,7 @@ def compute(sra_id):
     with NamedTemporaryFile("w+b") as f:
         try:
             shell(
-                "fastq-dump --disable-multithreading --fasta 0 --skip-technical --readids --read-filter pass --dumpbase --clip --split-e -Z {sra_id} | "
+                "fastq-dump --disable-multithreading --fasta 0 --skip-technical --readids --read-filter pass --dumpbase --clip -Z {sra_id} | "
                 "sourmash compute -k 21,31,51 "
                 "  --scaled 1000 "
                 "  --track-abundance "
