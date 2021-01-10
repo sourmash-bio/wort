@@ -9,3 +9,4 @@ admin/
 Cargo.lock
 target/
 fabfile.py
+*.wasm
