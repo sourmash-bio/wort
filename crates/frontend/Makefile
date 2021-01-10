@@ -11,7 +11,7 @@ app:
 		--no-typescript \
 		--out-dir static/ \
 		--out-name app \
-		../target/wasm32-unknown-unknown/${MODE}/greyhound_frontend.wasm
+		../../target/wasm32-unknown-unknown/${MODE}/greyhound_frontend.wasm
 
 worker:
 	cargo build --release --target wasm32-unknown-unknown --bin greyhound_worker
@@ -21,4 +21,4 @@ worker:
 		--no-typescript \
 		--out-dir static/ \
 		--out-name worker \
-		../target/wasm32-unknown-unknown/${MODE}/greyhound_worker.wasm
+		../../target/wasm32-unknown-unknown/${MODE}/greyhound_worker.wasm

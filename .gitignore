@@ -10,3 +10,4 @@ Cargo.lock
 target/
 fabfile.py
 *.wasm
+**/node_modules/*
