@@ -17,7 +17,7 @@ RUN apt-get update && \
     pip install micropipenv[toml]==0.3.0 && \
     micropipenv install --method pipenv --deploy && \
     pip cache purge && \
-    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.8/sratoolkit.2.10.8-ubuntu64.tar.gz && \
+    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.9/sratoolkit.2.10.9-ubuntu64.tar.gz && \
     tar xf sratoolkit.tar.gz && \
     rm sratoolkit.tar.gz && \
     apt-get remove -y build-essential libssl-dev && \
@@ -25,7 +25,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt && \
     pip uninstall -y micropipenv
 
-ENV PATH $PATH:/home/user/sratoolkit.2.10.8-ubuntu64/bin
+ENV PATH $PATH:/home/user/sratoolkit.2.10.9-ubuntu64/bin
 
 COPY --from=builder /usr/local/cargo/bin/decoct /usr/local/bin/sourmash
 
