@@ -2,6 +2,7 @@
 name = "greyhound-frontend"
 version = "0.1.0"
 authors = ["Luiz Irber <luiz.irber@gmail.com>"]
+license = "AGPL-3.0-only"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

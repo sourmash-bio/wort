@@ -7,7 +7,7 @@ module = "wort"
 author = "Luiz Irber"
 author-email = "wort@luizirber.org"
 home-page = "http://luizirber.org"
-classifiers = ["License :: OSI Approved :: BSD License"]
+classifiers = ["License :: OSI Approved :: GNU Affero General Public License v3"]
 
 [tool.flit.metadata.requires-extra]
 testing = [
