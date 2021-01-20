@@ -17,7 +17,5 @@ niffler = "2.2.0"
 
 [dependencies.sourmash]
 git = "https://github.com/dib-lab/sourmash.git"
-# This is the last rev without colors
-#rev = "c8c8fa87331c97d64a7237a67a4b1d10bf5b05ef"
 branch = "greyhound"
 features = ["experimental", "parallel"]
