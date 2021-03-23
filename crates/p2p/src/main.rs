@@ -35,14 +35,14 @@ use std::{
 };
 
 use async_std::{io, task};
-use env_logger::{Builder, Env};
+use env_logger::Env;
 use futures::prelude::*;
 use libp2p::gossipsub::protocol::MessageId;
 use libp2p::gossipsub::{GossipsubEvent, GossipsubMessage, MessageAuthenticity, Topic};
 use libp2p::{gossipsub, identity, PeerId};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    Builder::from_env(Env::default().default_filter_or("info")).init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     // Create a random PeerId
     let local_key = identity::Keypair::generate_ed25519();
@@ -53,7 +53,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let transport = libp2p::build_development_transport(local_key.clone())?;
 
     // Create a Gossipsub topic
-    let topic = Topic::new("test-net".into());
+    let topic = Topic::new("priority".into());
+    //let topic = Topic::new("public".into());
 
     // Create a Swarm to manage peers and events
     let mut swarm = {
@@ -83,6 +84,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Listen on all interfaces and whatever port the OS assigns
     libp2p::Swarm::listen_on(&mut swarm, "/ip4/0.0.0.0/tcp/0".parse().unwrap()).unwrap();
 
+    /* TODO client code
     // Reach out to another node if specified
     if let Some(to_dial) = std::env::args().nth(1) {
         let dialing = to_dial.clone();
@@ -94,6 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             Err(err) => println!("Failed to parse address to dial: {:?}", err),
         }
     }
+    */
 
     // Read full lines from stdin
     let mut stdin = io::BufReader::new(io::stdin()).lines();

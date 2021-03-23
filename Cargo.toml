@@ -1,9 +1,7 @@
 [workspace]
 members = ["crates/local", "crates/server", "crates/frontend", "crates/p2p", "crates/api"]
 
-#default-members = ["crates/api"]
-#default-members = ["crates/local", "crates/server", "crates/frontend", "crates/p2p", "crates/api"]
-default-members = ["crates/local", "crates/server", "crates/frontend", "crates/api"]
+default-members = ["crates/local", "crates/server", "crates/api"]
 
 [profile.release]
 #debug = true
