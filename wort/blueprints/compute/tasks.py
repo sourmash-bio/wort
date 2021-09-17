@@ -38,7 +38,7 @@ def compute(sra_id):
     with NamedTemporaryFile("w+b") as f:
         try:
             shell(
-                "fastq-dump --disable-multithreading --fasta 0 --skip-technical --readids --read-filter pass --dumpbase --split-spot --clip -Z {sra_id} | "
+                "sracat {sra_id} | "
                 "sourmash compute -k 21,31,51 "
                 "  --scaled 1000 "
                 "  --track-abundance "
@@ -48,8 +48,7 @@ def compute(sra_id):
             )
         except CalledProcessError as e:
             # We ignore SIGPIPE, since it is informational (and makes sense,
-            # it happens because `head` is closed and `fastq-dump` can't pipe
-            # its output anymore. More details:
+            # it happens because `sracat` is closed).  More details:
             # http://www.pixelbeat.org/programming/sigpipe_handling.html
             if e.returncode != 141:
                 raise e
@@ -62,7 +61,7 @@ def compute(sra_id):
 
         conn.put_object(
             Body=compressed_fp.getvalue(),
-            Bucket="wort-sra",
+            Bucket="wort-sracat",
             Key=key_path,
             ContentType="application/json",
             ContentEncoding="gzip",

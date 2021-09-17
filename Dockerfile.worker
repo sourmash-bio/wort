@@ -8,7 +8,6 @@ RUN micromamba install -y -n base -c conda-forge -c bioconda \
        sra-tools=2.11.0 \
        compilers=1.3.0 \
        ncbi-vdb=2.11.0 \
-       make nano \
        curl=7.79.0
 RUN curl -L -O https://github.com/lanl/sracat/archive/refs/tags/v0.2.tar.gz
 RUN tar xf v0.2.tar.gz
