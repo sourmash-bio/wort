@@ -1,0 +1,18 @@
+[package]
+name = "greyhound-p2p"
+version = "0.1.0"
+authors = ["Luiz Irber <luiz.irber@gmail.com>"]
+license = "AGPL-3.0-only"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = "1.0"
+async-std = { version = "1.6.0", features = ["attributes"] }
+sourmash = { git = "https://github.com/dib-lab/sourmash.git", branch = "greyhound", features = ["experimental"]}
+env_logger = "0.8.1"
+log = "0.4.8"
+thiserror = "1.0"
+futures = "0.3.1"
+libp2p = "0.29.1"

@@ -11,7 +11,7 @@ info:
     name: Luiz Irber
     email: wort@luizirber.org
   license:
-    name: BSD 3-Clause
+    name: AGPL-3.0-only
     url: 'https://raw.githubusercontent.com/dib-lab/wort/master/LICENSE'
 
 paths:
