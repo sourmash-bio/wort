@@ -18,7 +18,6 @@ pub struct Model {
     job: Box<dyn Bridge<native_worker::Worker>>,
     ft: Option<FetchTask>,
     sig: Option<Signature>,
-    reader: ReaderService,
     tasks: Vec<ReaderTask>,
     gather_result: Vec<GatherResult>,
 }
@@ -47,7 +46,6 @@ impl Component for Model {
             job,
             ft: None,
             sig: None,
-            reader: ReaderService::new(),
             tasks: vec![],
             gather_result: vec![],
         }
@@ -89,7 +87,7 @@ impl Component for Model {
                 for file in files.into_iter() {
                     let task = {
                         let callback = self.link.callback(Msg::SendToWorker);
-                        self.reader.read_file(file, callback).unwrap()
+                        ReaderService::read_file(file, callback).unwrap()
                     };
                     self.tasks.push(task);
                 }
@@ -147,14 +145,15 @@ impl Component for Model {
                 <p>
                   <b>{"greyhound"}</b>{" is an optimized approach for running "}<b>{"gather"}</b>
                   {" based on an Inverted Index containing a mapping of hashes to datasets containing them.
-                  In this demo the datasets are Scaled MinHash sketches (k=21, scaled=2000)
+                  In this demo the datasets are Scaled MinHash sketches (k=21, scaled=1000)
                   calculated from the "}
-                  <a href="https://gtdb.ecogenomic.org/stats">{"31,910 species clusters in the GTDB r95"}</a>{"."}
+                  <a href="https://gtdb.ecogenomic.org/stats">{"47,894 species clusters in the GTDB rs202 release"}</a>{"."}
                 </p>
 
                 <p>
-                  {"This demo server is hosted on a "}<a href="https://aws.amazon.com/ec2/instance-types/t3/">{"t3.2xlarge"}</a>
-                  {" spot instance on AWS, using ~10GB of the RAM for the inverted index + signature caching (for speed).
+                  {"This demo server is hosted on an "}
+                  <a href="https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm">{"Oracle cloud VM.Standard.A1.Flex instance (4 cores/24 GB RAM)"}</a>
+                  {" using ~7GB of the RAM for the inverted index + signature caching (for speed).
                   The server is implemented using "}<a href="https://github.com/http-rs/tide">{"tide"}</a>{", "}
                   {"an async web framework written in "}<a href="https://rust-lang.org">{"Rust"}</a>{". "}
                   {"The frontend is implemented in "}<a href="https://yew.rs">{"Yew"}</a>

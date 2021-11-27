@@ -41,7 +41,7 @@ impl Agent for Worker {
                 let params = ComputeParameters::builder()
                     .ksizes(vec![21])
                     .num_hashes(0)
-                    .scaled(2000)
+                    .scaled(1000)
                     .build();
                 let mut sig = Signature::from_params(&params);
 
