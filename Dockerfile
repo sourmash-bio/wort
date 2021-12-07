@@ -10,8 +10,10 @@ ADD Pipfile Pipfile.lock wortapp.py pyproject.toml ./
 RUN pip install pipenv flit
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev && \
+    pip install --upgrade pip && \
     pip install micropipenv[toml]==0.3.0 && \
     micropipenv install --method pipenv --deploy && \
+    pip install psycopg2-binary && \
     pip cache purge && \
     apt-get remove -y build-essential libssl-dev && \
     apt-get autoremove -y && \
