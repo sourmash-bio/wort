@@ -15,7 +15,7 @@ def build_link(accession, asm_name):
     db, acc = accession.split("_")
     number, version = acc.split(".")
     number = "/".join([number[pos:pos + 3] for pos in range(0, len(number), 3)])
-    url = f"ftp://ftp.ncbi.nlm.nih.gov/genomes/all/{db}/{number}"
+    url = f"https://ftp.ncbi.nlm.nih.gov/genomes/all/{db}/{number}"
     return f"{url}/{accession}_{asm_name}"
 
 
@@ -70,7 +70,8 @@ with requests.Session() as s:
                     else: # need to rebuild path from this accession...
                         row['ftp_path'] = build_link(row['assembly_accession'], row['asm_name'])
 
-                http_path = 'https' + row['ftp_path'][3:]
+                # 2021-11-22: ftp_path points to https now
+                http_path = row['ftp_path']
                 filename = http_path.split('/')[-1]
                 path = f"{http_path}/{filename}_genomic.fna.gz"
 
@@ -133,12 +134,13 @@ with requests.Session() as s:
 
                 # If it was updated, invalidate cache
                 if updated:
+                    print(f"Updating {acc}")
                     app.cache.delete(f"genomes/{acc}")
 
             if (n % 100 == 0) and (n != 0):
                 # Avoid committing all at once?
                 total += n
-                #print(f"Processed {total} datasets")
+                print(f"Processed {total} datasets")
                 n = 0
                 db.session.commit()
 
