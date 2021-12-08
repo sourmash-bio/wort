@@ -4,13 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "==1.1.2"
+flask = "<2"
 cachelib = "*"
 gunicorn = "==20.0.4"
-redis = "==2.10.6"
+redis = "<3"
 celery = {extras = ["sqs"]}
 snakemake = "==5.17.0"
-"boto3" = "==1.13.13"
+"boto3" = "==1.20.21"
 flask-wtf = "*"
 flask-migrate = "*"
 "psycopg2-binary" = "*"
@@ -18,11 +18,13 @@ flask-login = "*"
 "celery-s3" = "*"
 pycurl = "*"
 connexion = {extras = ["swagger-ui"],version = "==2.7.0"}
-jsonschema = "==2.6.0"
+jsonschema = "<3"
 flask-shell-ipython = "*"
+pandas = "*"
+flit = "*"
 
 [dev-packages]
-flit = "==2.3.0"
+flit = "*"
 pandas = "*"
 ipython = "*"
 httpie = "*"
