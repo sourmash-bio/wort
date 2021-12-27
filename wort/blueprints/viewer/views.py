@@ -29,7 +29,7 @@ def view_s3(public_db, dataset_id):
 # @viewer.route("/view/<db>/<dataset_id>")
 def view(public_db, dataset_id):
 
-    if public_db not in ("sra", "img"):
+    if public_db not in ("sra", "img", "genomes"):
         return "Database not supported", 404
 
     dataset_info = current_app.cache.get(f"{public_db}/{dataset_id}")
@@ -40,8 +40,11 @@ def view(public_db, dataset_id):
 
         if dataset is not None:
             # Found a hit in DB
-            if dataset.ipfs is not None:
+            if dataset.ipfs is not None and public_db == "genomes":
                 return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset.ipfs}")
+            else:
+                # SRA/IMG IPFS links are unreliable, default to s3
+                return view_s3(public_db, dataset_id)
     else:
         # Found in cache, redirect
         return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset_info['ipfs']}")

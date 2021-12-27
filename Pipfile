@@ -22,6 +22,7 @@ jsonschema = "<3"
 flask-shell-ipython = "*"
 pandas = "*"
 flit = "*"
+openapi-spec-validator = "==0.2.8"
 
 [dev-packages]
 flit = "*"

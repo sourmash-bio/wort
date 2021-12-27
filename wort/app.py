@@ -67,12 +67,12 @@ def create_app(settings_override=None):
     def index():
         n_datasets = current_app.cache.get(f"meta/n_datasets")
         if n_datasets is None:
-            n_datasets = Dataset.query.filter(Dataset.ipfs.isnot(None)).count()
+            n_datasets = Dataset.query.count()
             current_app.cache.set(f"meta/n_datasets", n_datasets, timeout=86400)
 
         size_TB = current_app.cache.get(f"meta/size_TB")
         if size_TB is None:
-            size_MB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).filter(Dataset.ipfs.isnot(None)).first()[0]
+            size_MB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).first()[0]
             size_TB = size_MB / 1000. / 1000.
             current_app.cache.set(f"meta/size_TB", size_TB, timeout=86400)
 
