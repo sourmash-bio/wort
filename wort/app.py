@@ -67,12 +67,12 @@ def create_app(settings_override=None):
     def index():
         n_datasets = current_app.cache.get(f"meta/n_datasets")
         if n_datasets is None:
-            n_datasets = Dataset.query.filter(Dataset.ipfs.isnot(None)).count()
+            n_datasets = Dataset.query.count()
             current_app.cache.set(f"meta/n_datasets", n_datasets, timeout=86400)
 
         size_TB = current_app.cache.get(f"meta/size_TB")
         if size_TB is None:
-            size_MB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).filter(Dataset.ipfs.isnot(None)).first()[0]
+            size_MB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).first()[0]
             size_TB = size_MB / 1000. / 1000.
             current_app.cache.set(f"meta/size_TB", size_TB, timeout=86400)
 
@@ -93,8 +93,9 @@ def create_app(settings_override=None):
             if dataset is not None:
                 # Found a hit in DB
                 dataset_info = {}
-                if dataset.ipfs is not None:
+                #if dataset.ipfs is not None:
                     # only show if IPFS hash is available
+                if 1:
                     dataset_info["name"] = dataset_id.upper()
                     dataset_info["db"] = public_db.upper()
                     dataset_info["link"] = f"/v1/view/{public_db}/{dataset_id}"

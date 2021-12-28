@@ -36,8 +36,8 @@ services:
     environment:
       PYTHONUNBUFFERED: 'true'
       FLASK_APP: 'wortapp.py'
-    #ports:
-    #  - "5000:5000"
+    ports:
+      - "8082:5000"
     links:
       - db
     depends_on:
@@ -47,25 +47,6 @@ services:
       - env.production
     volumes:
       - .:/app/wort
-
-  proxy:
-    restart: always
-    build:
-      context: nginx
-      dockerfile: Dockerfile
-    volumes:
-      - ./letsencrypt_certs:/etc/nginx/certs
-      - ./letsencrypt_www:/var/www/letsencrypt
-    ports:
-      - "80:80"
-      - "443:443"
-
-  letsencrypt:
-    image: certbot/certbot
-    command: /bin/true
-    volumes:
-      - ./letsencrypt_certs:/etc/letsencrypt
-      - ./letsencrypt_www:/var/www/letsencrypt
 
   redis:
     restart: always
