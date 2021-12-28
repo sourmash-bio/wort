@@ -11,7 +11,7 @@ RUN pip install pipenv flit
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev && \
     pip install --upgrade pip && \
-    pip install micropipenv[toml]==0.3.0 && \
+    pip install micropipenv[toml]==1.2.0 && \
     micropipenv install --method pipenv --deploy && \
     pip cache purge && \
     apt-get remove -y build-essential libssl-dev && \
