@@ -15,5 +15,8 @@ pkgs.mkShell {
     wasm-bindgen-cli
 
     nixpkgs-fmt
+
+    pipenv
+    curl
   ];
 }
