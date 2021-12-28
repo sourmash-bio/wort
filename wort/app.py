@@ -93,8 +93,9 @@ def create_app(settings_override=None):
             if dataset is not None:
                 # Found a hit in DB
                 dataset_info = {}
-                if dataset.ipfs is not None:
+                #if dataset.ipfs is not None:
                     # only show if IPFS hash is available
+                if 1:
                     dataset_info["name"] = dataset_id.upper()
                     dataset_info["db"] = public_db.upper()
                     dataset_info["link"] = f"/v1/view/{public_db}/{dataset_id}"

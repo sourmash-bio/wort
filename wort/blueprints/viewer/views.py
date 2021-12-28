@@ -35,6 +35,8 @@ def view(public_db, dataset_id):
     dataset_info = current_app.cache.get(f"{public_db}/{dataset_id}")
 
     if dataset_info is None:
+        from wort.models import Dataset
+
         # Not in cache, let's check DB
         dataset = Dataset.query.filter_by(id=dataset_id).first()
 
