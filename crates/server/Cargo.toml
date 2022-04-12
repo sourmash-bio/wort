@@ -11,7 +11,8 @@ tide = "0.16.0"
 tide-compress = "0.9.0"
 serde = "1.0"
 async-std = { version = "1.10.0", features = ["attributes"] }
-sourmash = { git = "https://github.com/dib-lab/sourmash.git", branch = "greyhound", features = ["experimental", "parallel"]}
+sourmash = { git = "https://github.com/sourmash-bio/sourmash.git", branch = "lirber/greyhound_zipstorage", features = ["parallel"]}
+#sourmash = { path = "../../../greyhound_zipstorage/src/core", features = ["parallel"]}
 log = "0.4.0"
 thiserror = "1.0"
 structopt = "0.3.0"

@@ -4,7 +4,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use sourmash::index::greyhound::{GatherResult, RevIndex};
+use sourmash::index::revindex::{GatherResult, RevIndex};
 use sourmash::signature::{Signature, SigsTrait};
 use sourmash::sketch::minhash::{max_hash_for_scaled, KmerMinHash};
 use sourmash::sketch::Sketch;
@@ -58,6 +58,13 @@ impl RevIndexState {
         scaled: Option<usize>,
         ksize: Option<u8>,
     ) -> Result<Self, Error> {
+        let max_hash = max_hash_for_scaled(scaled.unwrap() as u64);
+        let template_mh = KmerMinHash::builder()
+            .num(0u32)
+            .ksize(ksize.unwrap() as u32)
+            .max_hash(max_hash)
+            .build();
+
         let revindex = if from_file {
             let paths = BufReader::new(
                 File::open(path).map_err(|e| Error::IndexLoading(format!("{}", e)))?,
@@ -71,16 +78,13 @@ impl RevIndexState {
                 })
                 .collect();
 
-            let max_hash = max_hash_for_scaled(scaled.unwrap() as u64);
-            let template_mh = KmerMinHash::builder()
-                .num(0u32)
-                .ksize(ksize.unwrap() as u32)
-                .max_hash(max_hash)
-                .build();
-
             RevIndex::new(&sigs, &Sketch::MinHash(template_mh), 0, None, true)
         } else {
-            RevIndex::load(path, None).map_err(|e| Error::IndexLoading(format!("{}", e)))?
+            let storage = sourmash::storage::ZipStorage::from_file(path.as_ref().to_str().unwrap())
+                .map_err(|e| Error::IndexLoading(format!("{}", e)))?;
+
+            RevIndex::from_zipstorage(storage, &Sketch::MinHash(template_mh), 0, None, false)
+                .map_err(|e| Error::IndexLoading(format!("{}", e)))?
         };
 
         Ok(Self {

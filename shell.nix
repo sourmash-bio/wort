@@ -13,6 +13,7 @@ pkgs.mkShell {
     wasm-pack
     wasmtime
     wasm-bindgen-cli
+    cargo-outdated
 
     nixpkgs-fmt
 
