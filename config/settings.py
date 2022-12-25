@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 SECRET_KEY = os.environ.get("SECRET_KEY", "insecuredev")
 
 # Celery SQS
-CELERY_RESULT_BACKEND = "celery_s3.backends.S3Backend"
+result_backend = "celery_s3.backends.S3Backend"
 
 CELERY_S3_BACKEND_SETTINGS = {
     "aws_access_key_id": os.environ["AWS_ACCESS_KEY_ID"],
@@ -13,25 +13,25 @@ CELERY_S3_BACKEND_SETTINGS = {
     "bucket": "wort-results",
 }
 
-CELERY_TASK_SERIALIZER = "json"
-CELERY_ACCEPT_CONTENT = ["json", "yaml"]
-CELERY_RESULT_SERIALIZER = "json"
+task_serializer = "json"
+accept_content = ["json", "yaml"]
+result_serializer = "json"
 
-CELERY_ENABLE_REMOTE_CONTROL = False
-CELERY_SEND_EVENTS = False
+worker_enable_remote_control = False
+worker_send_tasks_events = False
 
-CELERY_ENABLE_UTC = True
-CELERY_DISABLE_RATE_LIMITS = True
+CELERY_enable_utc = True
+worker_disable_rate_limits = True
 
-CELERY_BROKER_URL = "sqs://"
-BROKER_TRANSPORT_OPTIONS = {
+CELERY_broker_url = "sqs://"
+broker_transport_options = {
     "queue_name_prefix": "wort-",
     "visibility_timeout": 3600,  # seconds
     "wait_time_seconds": 20,  # Long polling
     "polling_interval": 10,  # check queue every 10 seconds
 }
 
-BROKER_HEARTBEAT = None
+broker_heartbeat = None
 
 SQLALCHEMY_DATABASE_URI = os.path.expandvars(
     os.environ.get("DATABASE_URL", "sqlite:///" + os.path.join(basedir, "app.db"))
