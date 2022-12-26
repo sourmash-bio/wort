@@ -4,38 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "<2"
-cachelib = "*"
-gunicorn = "==20.0.4"
-redis = "<3"
-celery = {extras = ["sqs"]}
-snakemake = "==7.19.1"
-"boto3" = "==1.20.21"
-flask-wtf = "*"
-flask-migrate = "*"
-"psycopg2-binary" = "*"
-flask-login = "*"
-"celery-s3" = "*"
-pycurl = "*"
-connexion = {extras = ["swagger-ui"],version = "==2.7.0"}
-jsonschema = "<3"
-flask-shell-ipython = "*"
-pandas = "*"
-flit = "*"
-openapi-spec-validator = "==0.2.8"
+#wort = { path = ".", editable = true }
 
 [dev-packages]
-flit = "*"
 pandas = "*"
 ipython = "*"
 httpie = "*"
 requests = "*"
 black = "*"
 awscli = "*"
-pdoc = "*"
-
-#[pipenv]
-#allow_prereleases = true
 
 [requires]
 python_version = "3.10"

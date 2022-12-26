@@ -16,7 +16,7 @@ pkgs.mkShell {
 
     nixpkgs-fmt
 
-    (python310.withPackages (ps: with ps; [] ))
+    (python310.withPackages (ps: with ps; [ flit ] ))
     pipenv
     curl
   ];
