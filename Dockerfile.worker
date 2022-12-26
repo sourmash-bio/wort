@@ -1,33 +1,43 @@
 # Build decoct
-FROM rust:1-slim-buster as builder
+FROM rust:1-slim-bullseye as builder
 RUN cargo install --git https://github.com/luizirber/decoct --rev 630f5a773e6df22a33dafc3d744e39735c055328
 
+#--------------------
+
 # Build worker image
-FROM python:3.8.3-slim-buster
+FROM python:3.10.9-slim-bullseye as base
 
 RUN groupadd user && \
     useradd --create-home --home-dir /home/user -g user -s /bin/bash user
 
 WORKDIR /home/user
 
+#--------------------
+
+FROM base as python-deps
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev curl
+
+RUN pip install pipenv
+
 ADD Pipfile Pipfile.lock ./
+RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev curl && \
-    pip install micropipenv[toml]==0.3.0 && \
-    micropipenv install --method pipenv --deploy && \
-    pip cache purge && \
-    curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.10.9/sratoolkit.2.10.9-ubuntu64.tar.gz && \
-    tar xf sratoolkit.tar.gz && \
-    rm sratoolkit.tar.gz && \
-    apt-get remove -y build-essential libssl-dev && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt && \
-    pip uninstall -y micropipenv
+RUN curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.2/sratoolkit.3.0.2-ubuntu64.tar.gz
+RUN tar xf sratoolkit.tar.gz
 
-ENV PATH $PATH:/home/user/sratoolkit.2.10.9-ubuntu64/bin
+#--------------------
+
+FROM base as runtime
 
 COPY --from=builder /usr/local/cargo/bin/decoct /usr/local/bin/sourmash
+COPY --from=python-deps /home/user/sratoolkit.3.0.2-ubuntu64/bin /home/user/sratoolkit.3.0.2-ubuntu64/bin
+COPY --from=python-deps /home/user/.venv /home/user/.venv
+
+ENV PATH "/home/user/.venv/bin:$PATH"
+
+ENV PATH "$PATH:/home/user/sratoolkit.3.0.2-ubuntu64/bin"
 
 USER user
 

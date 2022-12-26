@@ -9,7 +9,7 @@ cachelib = "*"
 gunicorn = "==20.0.4"
 redis = "<3"
 celery = {extras = ["sqs"]}
-snakemake = "==5.17.0"
+snakemake = "==7.19.1"
 "boto3" = "==1.20.21"
 flask-wtf = "*"
 flask-migrate = "*"
@@ -34,8 +34,8 @@ black = "*"
 awscli = "*"
 pdoc = "*"
 
-[pipenv]
-allow_prereleases = true
+#[pipenv]
+#allow_prereleases = true
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"
