@@ -19,10 +19,11 @@ FROM base as python-deps
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev libssl-dev curl
 
-RUN pip install pipenv
+RUN python3 -m venv /home/user/.venv
 
-ADD Pipfile Pipfile.lock ./
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
+COPY requirements.txt ./
+
+RUN . /home/user/.venv/bin/activate && pip install -r requirements.txt
 
 RUN curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.2/sratoolkit.3.0.2-ubuntu64.tar.gz
 RUN tar xf sratoolkit.tar.gz
@@ -38,6 +39,10 @@ COPY --from=python-deps /home/user/.venv /home/user/.venv
 ENV PATH "/home/user/.venv/bin:$PATH"
 
 ENV PATH "$PATH:/home/user/sratoolkit.3.0.2-ubuntu64/bin"
+
+# needed for celery[sqs]
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends libcurl4-openssl-dev libssl-dev
 
 USER user
 

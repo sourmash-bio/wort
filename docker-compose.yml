@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 
 services:
 
@@ -13,7 +13,8 @@ services:
   worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: Dockerfile
+      target: worker
     image: wort-worker
     env_file:
       - iam/wort_s3.env
@@ -29,6 +30,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: web
     command: >
       gunicorn -b 0.0.0.0:5000
         --access-logfile -
