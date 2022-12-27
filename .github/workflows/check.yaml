@@ -1,0 +1,12 @@
+name: Check docker-compose can build containers
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the stack
+        run: docker-compose build
+      # TODO: check containers can start
+      #- name: Bring up containers
+      #  run: docker-compose up -d web worker
