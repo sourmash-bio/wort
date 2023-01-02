@@ -16,7 +16,7 @@ pkgs.mkShell {
 
     nixpkgs-fmt
 
-    pipenv
+    (python310.withPackages (ps: with ps; [ flit pip-tools ] ))
     curl
   ];
 }

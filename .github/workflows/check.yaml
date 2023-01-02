@@ -1,0 +1,17 @@
+name: Check docker-compose can build containers
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create empty env files
+        run: |
+          touch env.production
+          mkdir -p iam
+          touch iam/wort_s3.env
+      - name: Build the stack
+        run: docker-compose build
+      # TODO: check containers can start
+      #- name: Bring up containers
+      #  run: docker-compose up -d web worker

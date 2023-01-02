@@ -1,16 +1,45 @@
 [build-system]
-requires = ["flit"]
-build-backend = "flit.buildapi"
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "wort"
-author = "Luiz Irber"
-author-email = "wort@luizirber.org"
-home-page = "http://luizirber.org"
+[project]
+name = "wort"
+authors = [ { name = "Luiz Irber", email = "wort@luizirber.org" }]
+#home-page = "https://wort.sourmash.bio"
 classifiers = ["License :: OSI Approved :: GNU Affero General Public License v3"]
+dynamic = ["version", "description"]
+dependencies = [
+  "flask",
+  "cachelib",
+  "gunicorn",
+  "redis",
+  "celery[sqs,s3]",
+  "snakemake",
+  "boto3",
+  "flask-wtf",
+  "flask-migrate",
+  "psycopg2-binary",
+  "flask-login",
+  "pycurl",
+  "connexion[swagger-ui]",
+  "jsonschema",
+  "flask-shell-ipython",
+  "openapi-spec-validator",
+]
 
-[tool.flit.metadata.requires-extra]
+[project.optional-dependencies]
 testing = [
   "pytest >=4",
   "pytest-cov",
 ]
+
+#dev = [
+#flit = "*"
+#pandas = "*"
+#ipython = "*"
+#httpie = "*"
+#requests = "*"
+#black = "*"
+#awscli = "*"
+#pdoc = "*"
+#]

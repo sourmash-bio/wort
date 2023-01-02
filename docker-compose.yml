@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 
 services:
 
@@ -13,21 +13,24 @@ services:
   worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: Dockerfile
+      target: worker
     image: wort-worker
     env_file:
       - iam/wort_s3.env
     command: >
       celery -A wort.blueprints.compute.tasks
+             worker
              -Q compute_small,compute_medium,compute_large
              --without-gossip --without-mingle --without-heartbeat
-             -l INFO -c 1 worker
+             -l INFO -c 1
 
   web:
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
+      target: web
     command: >
       gunicorn -b 0.0.0.0:5000
         --access-logfile -

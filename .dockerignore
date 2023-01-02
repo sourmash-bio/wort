@@ -5,6 +5,7 @@
 !wort/
 !Pipfile.lock
 !Pipfile
+!requirements.txt
 !config/
 !wortapp.py
 !pyproject.toml
