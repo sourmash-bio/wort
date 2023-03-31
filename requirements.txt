@@ -637,9 +637,9 @@ pyyaml==6.0 \
     #   openapi-spec-validator
     #   snakemake
     #   yte
-redis==4.4.0 \
-    --hash=sha256:7b8c87d19c45d3f1271b124858d2a5c13160c4e74d4835e28273400fa34d5228 \
-    --hash=sha256:cae3ee5d1f57d8caf534cd8764edf3163c77e073bdd74b6f54a87ffafdc5e7d9
+redis==4.4.4 \
+    --hash=sha256:68226f7ede928db8302f29ab088a157f41061fa946b7ae865452b6d7838bbffb \
+    --hash=sha256:da92a39fec86438d3f1e2a1db33c312985806954fe860120b582a8430e231d8f
     # via wort (pyproject.toml)
 requests==2.28.1 \
     --hash=sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983 \
