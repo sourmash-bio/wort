@@ -52,6 +52,10 @@ img {
   max-width: 100%;
 }
 
+footer img {
+  max-height: 50px;
+}
+
 /*
   Set images to full width by default. This also stops
   images from “jumping” during layout (which happens if only
