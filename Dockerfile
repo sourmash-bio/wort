@@ -21,7 +21,7 @@ RUN python3 -m venv /home/user/.venv
 
 COPY requirements.txt ./
 
-RUN . /home/user/.venv/bin/activate && pip install -r requirements.txt
+RUN . /home/user/.venv/bin/activate && pip install --require-hashes -r requirements.txt
 
 RUN curl --output sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.2/sratoolkit.3.0.2-ubuntu64.tar.gz
 RUN tar xf sratoolkit.tar.gz

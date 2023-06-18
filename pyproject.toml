@@ -9,7 +9,7 @@ authors = [ { name = "Luiz Irber", email = "wort@luizirber.org" }]
 classifiers = ["License :: OSI Approved :: GNU Affero General Public License v3"]
 dynamic = ["version", "description"]
 dependencies = [
-  "flask",
+  "flask<2.3.0",
   "cachelib",
   "gunicorn",
   "redis",
