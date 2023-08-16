@@ -25,6 +25,9 @@ dependencies = [
   "jsonschema",
   "flask-shell-ipython",
   "openapi-spec-validator",
+  # for updates
+  "pandas",
+  "biopython",
 ]
 
 [project.optional-dependencies]
@@ -32,14 +35,3 @@ testing = [
   "pytest >=4",
   "pytest-cov",
 ]
-
-#dev = [
-#flit = "*"
-#pandas = "*"
-#ipython = "*"
-#httpie = "*"
-#requests = "*"
-#black = "*"
-#awscli = "*"
-#pdoc = "*"
-#]
