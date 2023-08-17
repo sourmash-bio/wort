@@ -6,12 +6,16 @@ import pandas as pd
 
 def main(args):
     day_to_check = args.start.strftime("%Y/%m/%d")
+    end_date = "3000"
+    if args.end is not None:
+        end_date = args.end.strftime("%Y/%m/%d")
+
     Entrez.email = args.email  # Set email address
 
     # Perform the Biopython search for genomic samples
-    query_dna = f'("{day_to_check}"[PDAT] : "3000"[PDAT]) AND "biomol dna"[Properties] NOT amplicon[All Fields] NOT "Metazoa"[orgn:__txid33208] NOT "Streptophyta"[orgn:__txid35493] NOT "METAGENOMIC"[Source]'
-    query_metagenomic = f'("{day_to_check}"[PDAT] : "3000"[PDAT]) NOT amplicon[All Fields] AND "METAGENOMIC"[Source]'
-    query_metatranscriptomic = f'("{day_to_check}"[PDAT] : "3000"[PDAT]) NOT amplicon[All Fields] AND "METATRANSCRIPTOMIC"[Source]'
+    query_dna = f'("{day_to_check}"[PDAT] : "{end_date}"[PDAT]) AND "biomol dna"[Properties] NOT amplicon[All Fields] NOT "Metazoa"[orgn:__txid33208] NOT "Streptophyta"[orgn:__txid35493] NOT "METAGENOMIC"[Source]'
+    query_metagenomic = f'("{day_to_check}"[PDAT] : "{end_date}"[PDAT]) NOT amplicon[All Fields] AND "METAGENOMIC"[Source]'
+    query_metatranscriptomic = f'("{day_to_check}"[PDAT] : "{end_date}"[PDAT]) NOT amplicon[All Fields] AND "METATRANSCRIPTOMIC"[Source]'
 
     download_entrez(query_dna, args.genomes, "genomic")
     download_entrez(query_metagenomic, args.metagenomes, "metagenomic")
@@ -46,6 +50,7 @@ if __name__ == '__main__':
     p.add_argument('--metatranscriptomes', type=str, help="output file for metatranscriptomes")
     p.add_argument('--email', default='admin@sourmash.bio')
     p.add_argument('--start', default=yesterday, type=datetime.date.fromisoformat)
+    p.add_argument('--end', default=None, type=datetime.date.fromisoformat)
     # Parse command line arguments
     args = p.parse_args()
 
