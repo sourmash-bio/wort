@@ -13,6 +13,10 @@ n = 0
 with open(sys.argv[1], 'r') as fp:
     datasets = csv.DictReader(fp, delimiter=',')
     for row in datasets:
+        if row["size_MB"] == "size_MB":
+            # dumb error from entrez-direct, it repeats the header in the middle =/
+            continue
+
         dataset_in_db = Dataset.query.filter_by(id=row['Run']).first()
         sra_id = row["Run"]
 

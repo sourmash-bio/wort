@@ -8,8 +8,8 @@ from requests.exceptions import ConnectionError
 
 filename = sys.argv[1]
 
-genomes = pd.read_table(filename, header=1, usecols=["# assembly_accession"])
-accessions = genomes["# assembly_accession"]
+genomes = pd.read_table(filename, header=1, usecols=["#assembly_accession"])
+accessions = genomes["#assembly_accession"]
 
 url  ="https://wort.oxli.org"
 # TODO: read PASSWORD from env

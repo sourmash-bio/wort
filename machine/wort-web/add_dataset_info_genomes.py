@@ -46,7 +46,7 @@ total = 0
 with requests.Session() as s:
     with gzip.open(sys.argv[1], 'rt') as fp:
         fp.readline() # Skip first line
-        fp.read(2) # skip initial comment in header
+        fp.read(1) # skip initial comment in header
 
         datasets = csv.DictReader(fp, delimiter='\t')
         for row in datasets:

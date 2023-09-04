@@ -89,16 +89,15 @@ def create_app(settings_override=None):
             if dataset is not None:
                 # Found a hit in DB
                 dataset_info = {}
-                #if dataset.ipfs is not None:
+                dataset_info["name"] = dataset_id.upper()
+                dataset_info["db"] = public_db.upper()
+                dataset_info["link"] = f"/v1/view/{public_db}/{dataset_id}"
+                dataset_info["metadata"] = dataset.database.metadata_link.format(dataset=dataset_id)
+                if dataset.ipfs is not None:
                     # only show if IPFS hash is available
-                if 1:
-                    dataset_info["name"] = dataset_id.upper()
-                    dataset_info["db"] = public_db.upper()
-                    dataset_info["link"] = f"/v1/view/{public_db}/{dataset_id}"
-                    dataset_info["metadata"] = dataset.database.metadata_link.format(dataset=dataset_id)
                     dataset_info["ipfs"] = dataset.ipfs
-                    # let's update cache
-                    current_app.cache.set(f"{public_db}/{dataset_id}", dataset_info)
+                # let's update cache
+                current_app.cache.set(f"{public_db}/{dataset_id}", dataset_info)
 
         return render_template("view.html", dataset=dataset_info)
 
