@@ -16,7 +16,7 @@ pkgs.mkShell {
 
     nixpkgs-fmt
 
-    (python310.withPackages (ps: with ps; [ flit pip-tools ] ))
+    (python310.withPackages (ps: with ps; [ flit pip-tools biopython pandas pipx ] ))
     curl
   ];
 }
