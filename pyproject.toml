@@ -28,6 +28,8 @@ dependencies = [
   # for updates
   "pandas",
   "biopython",
+  # for sentry
+  "sentry-sdk[flask,celery,sqlalchemy]"
 ]
 
 [project.optional-dependencies]
