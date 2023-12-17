@@ -44,6 +44,16 @@ def create_app(settings_override=None):
     :param settings_override: Override settings
     :return: Flask app
     """
+    ### Init sentry
+    import sentry_sdk
+    from sentry_sdk.integrations.redis import RedisIntegration
+    sentry_sdk.init(
+        enable_tracing=True,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
+    #################
+
     app = connexion.App(__name__, options={"swagger_ui": True, "serve_spec": True})
     app.add_api("api.yaml")
 
