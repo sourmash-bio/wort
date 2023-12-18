@@ -14,7 +14,6 @@ dependencies = [
   "gunicorn",
   "redis",
   "celery[sqs,s3]",
-  "snakemake",
   "boto3",
   "flask-wtf",
   "flask-migrate",
