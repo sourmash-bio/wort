@@ -14,7 +14,6 @@ dependencies = [
   "gunicorn",
   "redis",
   "celery[sqs,s3]",
-  "snakemake",
   "boto3",
   "flask-wtf",
   "flask-migrate",
@@ -28,6 +27,8 @@ dependencies = [
   # for updates
   "pandas",
   "biopython",
+  # for sentry
+  "sentry-sdk[flask,celery,sqlalchemy]"
 ]
 
 [project.optional-dependencies]
