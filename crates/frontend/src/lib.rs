@@ -10,7 +10,7 @@ use yew::services::reader::{File, FileData, ReaderService, ReaderTask};
 use yew::worker::{Bridge, Bridged};
 use yew::{html, Callback, ChangeData, Component, ComponentLink, Html, ShouldRender};
 
-use sourmash::index::greyhound::GatherResult;
+use sourmash::index::GatherResult;
 use sourmash::signature::Signature;
 
 pub struct Model {

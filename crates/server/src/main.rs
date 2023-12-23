@@ -1,10 +1,11 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::path::Path;
-use std::path::PathBuf;
 use std::sync::Arc;
 
-use sourmash::index::greyhound::{GatherResult, RevIndex};
+use camino::Utf8Path as Path;
+use camino::Utf8PathBuf as PathBuf;
+use sourmash::index::revindex::mem_revindex::RevIndex;
+use sourmash::index::GatherResult;
 use sourmash::signature::{Signature, SigsTrait};
 use sourmash::sketch::minhash::{max_hash_for_scaled, KmerMinHash};
 use sourmash::sketch::Sketch;
@@ -15,7 +16,7 @@ use tide::{self, Body, Request};
 #[derive(StructOpt, Debug)]
 struct Cli {
     /// Index to serve
-    #[structopt(parse(from_os_str))]
+    #[structopt(parse(from_str))]
     index_path: PathBuf,
 
     /// Is the index a list of signatures?
@@ -58,9 +59,18 @@ impl RevIndexState {
         scaled: Option<usize>,
         ksize: Option<u8>,
     ) -> Result<Self, Error> {
+        let max_hash = max_hash_for_scaled(scaled.unwrap() as u64);
+        let template = Sketch::MinHash(
+            KmerMinHash::builder()
+                .num(0u32)
+                .ksize(ksize.unwrap() as u32)
+                .max_hash(max_hash)
+                .build(),
+        );
+
         let revindex = if from_file {
             let paths = BufReader::new(
-                File::open(path).map_err(|e| Error::IndexLoading(format!("{}", e)))?,
+                File::open(path.as_ref()).map_err(|e| Error::IndexLoading(format!("{}", e)))?,
             );
             let sigs: Vec<PathBuf> = paths
                 .lines()
@@ -71,16 +81,11 @@ impl RevIndexState {
                 })
                 .collect();
 
-            let max_hash = max_hash_for_scaled(scaled.unwrap() as u64);
-            let template_mh = KmerMinHash::builder()
-                .num(0u32)
-                .ksize(ksize.unwrap() as u32)
-                .max_hash(max_hash)
-                .build();
-
-            RevIndex::new(&sigs, &Sketch::MinHash(template_mh), 0, None, true)
+            RevIndex::new(&sigs, &template, 0, None, true)
+                .map_err(|e| Error::IndexLoading(format!("{}", e)))?
         } else {
-            RevIndex::load(path, None).map_err(|e| Error::IndexLoading(format!("{}", e)))?
+            RevIndex::from_zipfile(path, &template, 0, None, false)
+                .map_err(|e| Error::IndexLoading(format!("{}", e)))?
         };
 
         Ok(Self {

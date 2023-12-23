@@ -8,14 +8,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-structopt = "0.3.15"
-env_logger = "0.7.1"
-log = "0.4.8"
-rayon = "1.0"
-serde_json = "1.0.56"
-niffler = "2.2.0"
-
-[dependencies.sourmash]
-git = "https://github.com/dib-lab/sourmash.git"
-branch = "greyhound"
-features = ["experimental", "parallel"]
+camino.workspace = true
+env_logger.workspace = true
+log.workspace = true
+niffler.workspace = true
+rayon.workspace = true
+serde_json.workspace = true
+sourmash.workspace = true
+structopt.workspace = true
