@@ -7,6 +7,7 @@ channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "linux-aarch64"]
 
 [tasks]
+submit = "python machine/wort-web/submit.py"
 
 [dependencies]
 sourmash-minimal = ">=4.8.5,<4.9"
@@ -17,6 +18,7 @@ pycurl = ">=7.45.1,<7.46"
 cachelib = ">=0.10.2,<0.11"
 pandas = ">=2.0.3,<2.1"
 psycopg2-binary = ">=2.9.9,<2.10"
+awscli = ">=2.15.8,<2.16"
 
 [target.linux-64.dependencies]
 sra-tools = ">=3.0.9,<3.1"
@@ -35,3 +37,6 @@ openapi-spec-validator = ">=0.5.7,<0.6"
 sentry-sdk = { version = ">=1.39.1,<1.40", extras = ["flask", "celery", "sqlalchemy"] }
 connexion = { version = ">=2.14.2,<2.15", extras = ["swagger-ui"] }
 celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
+
+[system-requirements]
+linux = "5.4.17"
