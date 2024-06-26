@@ -2,6 +2,7 @@ import gzip
 import os
 import shutil
 from io import BytesIO
+import shlex
 from subprocess import run, CalledProcessError
 from tempfile import NamedTemporaryFile
 
@@ -104,10 +105,11 @@ def compute_genomes(accession, path, name):
                 "sourmash compute -k 21,31,51 "
                 "  --scaled 1000 "
                 "  --track-abundance "
-                "  --name {name:q} "
+                "  --name {shlex.quote(name)} "
                 f"  -o {f.name} "
-                f"  <(curl {path})",
+                f"  <(curl {path} | zcat)",
                 shell=True, capture_output=True, check=True,
+                executable="/bin/bash",
             )
         except CalledProcessError as e:
             # We ignore SIGPIPE, since it is informational (and makes sense,
