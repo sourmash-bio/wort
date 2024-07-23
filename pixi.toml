@@ -34,7 +34,7 @@ flask-login = ">=0.6.2,<0.7"
 jsonschema = ">=4.17.3,<4.18"
 flask-shell-ipython = ">=0.5.1,<0.6"
 openapi-spec-validator = ">=0.5.7,<0.6"
-sentry-sdk = { version = ">=1.39.1,<1.40", extras = ["flask", "celery", "sqlalchemy"] }
+sentry-sdk = { version = ">=2.10.0,<2.11.0", extras = ["flask", "celery", "sqlalchemy"] }
 connexion = { version = ">=2.14.2,<2.15", extras = ["swagger-ui"] }
 celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
 
