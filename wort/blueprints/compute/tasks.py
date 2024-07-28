@@ -47,6 +47,7 @@ def compute(sra_id):
                 f"  -o {f.name} "
                 "  - ",
                 shell=True, capture_output=True, check=True,
+                executable="/bin/bash",
             )
         except CalledProcessError as e:
             if e.returncode == 3:
