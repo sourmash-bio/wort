@@ -40,5 +40,5 @@ connexion = { version = ">=2.14.2,<2.15", extras = ["swagger-ui"] }
 celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
 
 [system-requirements]
-linux = "5.4.17"
+linux = "3.10"
 libc = "2.17"
