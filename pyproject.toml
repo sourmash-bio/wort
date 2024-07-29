@@ -1,38 +1,83 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
 
 [project]
 name = "wort"
-authors = [ { name = "Luiz Irber", email = "wort@luizirber.org" }]
+description = "A database for signatures of public genomic sources"
+authors = [ { name = "Luiz Irber", email = "luiz@sourmash.bio" }]
 #home-page = "https://wort.sourmash.bio"
 classifiers = ["License :: OSI Approved :: GNU Affero General Public License v3"]
-dynamic = ["version", "description"]
-dependencies = [
-  "flask<2.3.0",
-  "cachelib",
-  "gunicorn",
-  "redis",
-  "celery[sqs,s3]",
-  "boto3",
-  "flask-wtf",
-  "flask-migrate",
-  "psycopg2-binary",
-  "flask-login",
-  "pycurl",
-  "connexion[swagger-ui,flask]",
-  "jsonschema",
-  "flask-shell-ipython",
-  "openapi-spec-validator",
-  # for updates
-  "pandas",
-  "biopython",
-  # for sentry
-  "sentry-sdk[flask,celery,sqlalchemy]"
-]
+version = "0.0.2"
+requires-python = ">=3.10"
 
-[project.optional-dependencies]
-testing = [
-  "pytest >=4",
-  "pytest-cov",
-]
+[tool.pixi.project]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64", "linux-aarch64"]
+
+[tool.pixi.dependencies]
+sourmash-minimal = ">=4.8.5,<4.9"
+curl = ">=8.5.0,<8.6"
+python = "3.10.*"
+biopython = ">=1.81,<2"
+pycurl = ">=7.45.1,<7.46"
+cachelib = ">=0.10.2,<0.11"
+pandas = ">=2.0.3,<2.1"
+psycopg2-binary = ">=2.9.9,<2.10"
+awscli = ">=2.15.8,<2.16"
+
+[tool.pixi.target.linux-64.dependencies]
+sra-tools = ">=3.0.9,<3.1"
+
+[tool.pixi.feature.dev.pypi-dependencies]
+wort = { path = ".", editable = true }
+
+[tool.pixi.feature.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+
+# Used for installing into production, as a post-process step
+[tool.pixi.feature.prod.host-dependencies]
+pip = "*"
+
+[tool.pixi.feature.build.dependencies]
+build = "*"
+flit-core = ">=3.2,<4"
+
+[tool.pixi.feature.build.tasks]
+# Create a wheel for installation
+build-wheel = "python -m build --no-isolation --wheel ."
+
+[tool.pixi.feature.prod.tasks]
+# Install into the production environment
+postinstall-production = "pip install --no-deps --disable-pip-version-check dist/wort-*.whl"
+
+[tool.pixi.tasks]
+submit = "python machine/wort-web/submit.py"
+dev = "flask --app wort.app:create_app --bind :8000"
+start = "gunicorn -b 0.0.0.0:5000 --access-logfile - --reload 'wort.app:create_app()'"
+
+[tool.pixi.pypi-dependencies]
+flask = "<2.3.0"
+gunicorn = ">=20.1.0,<20.2"
+redis = ">=4.5.5,<4.6"
+flask-wtf = ">=1.1.1,<1.2"
+flask-migrate = ">=4.0.4,<4.1"
+flask-login = ">=0.6.2,<0.7"
+jsonschema = ">=4.17.3,<4.18"
+flask-shell-ipython = ">=0.5.1,<0.6"
+openapi-spec-validator = ">=0.5.7,<0.6"
+sentry-sdk = { version = ">=2.10.0,<2.11.0", extras = ["flask", "celery", "sqlalchemy"] }
+connexion = { version = ">=2.14.2,<3", extras = ["swagger-ui"] }
+werkzeug = ">=1.0,<2.3"
+celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
+
+[tool.pixi.environments]
+# Default environment, has features for running in development, testing, and building
+default = { features = ["test", "dev", "build"], solve-group = "default" }
+# Leaner environment for use in production
+prod = { features = ["prod"], solve-group = "default" }
+
+[tool.pixi.system-requirements]
+linux = "3.10"
+libc = "2.17"
