@@ -11,6 +11,7 @@ target/
 fabfile.py
 *.wasm
 **/node_modules/*
+dist/
 
 .config/
 .envrc
