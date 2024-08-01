@@ -3,17 +3,20 @@ FROM ghcr.io/prefix-dev/pixi:0.26.1 AS build
 COPY . /app
 WORKDIR /app
 RUN pixi run build-wheel
-RUN pixi run postinstall-production
-RUN pixi shell-hook -e prod > /shell-hook
-RUN echo 'exec "$@"' >> /shell-hook
+RUN pixi run -e web postinstall-prod
+RUN pixi shell-hook -e web > /shell-hook-web
+RUN echo 'exec "$@"' >> /shell-hook-web
+RUN pixi run -e worker postinstall-prod
+RUN pixi shell-hook -e worker > /shell-hook-worker
+RUN echo 'exec "$@"' >> /shell-hook-worker
 
 #--------------------
 
 FROM ubuntu:24.04 AS web 
 
 # only copy the production environment into prod container
-COPY --from=build /app/.pixi/envs/prod /app/.pixi/envs/prod
-COPY --from=build /shell-hook /shell-hook
+COPY --from=build /app/.pixi/envs/web /app/.pixi/envs/web
+COPY --from=build /shell-hook-web /shell-hook
 
 RUN groupadd user && \
     useradd --create-home --home-dir /home/user -g user -s /bin/bash user
@@ -23,7 +26,7 @@ COPY config/ /app/config
 
 WORKDIR /app
 
-USER user 
+#USER user 
 
 ENTRYPOINT ["/bin/bash", "/shell-hook"]
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "--access-logfile", "-", "'wortapp:create_app()'"]
@@ -33,8 +36,8 @@ CMD ["gunicorn", "-b", "0.0.0.0:5000", "--access-logfile", "-", "'wortapp:create
 FROM ubuntu:24.04 AS worker
 
 # only copy the production environment into prod container
-COPY --from=build /app/.pixi/envs/prod /app/.pixi/envs/prod
-COPY --from=build /shell-hook /shell-hook
+COPY --from=build /app/.pixi/envs/worker /app/.pixi/envs/worker
+COPY --from=build /shell-hook-worker /shell-hook
 
 RUN groupadd user && \
     useradd --create-home --home-dir /home/user -g user -s /bin/bash user
