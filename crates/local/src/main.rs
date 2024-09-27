@@ -2,13 +2,14 @@ use std::cmp;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
 
+use camino::Utf8Path as Path;
+use camino::Utf8PathBuf as PathBuf;
 use log::info;
+use rayon::prelude::*;
 use structopt::StructOpt;
 
-use rayon::prelude::*;
-use sourmash::index::greyhound::RevIndex;
+use sourmash::index::revindex::mem_revindex::RevIndex;
 use sourmash::signature::{Signature, SigsTrait};
 use sourmash::sketch::minhash::{max_hash_for_scaled, KmerMinHash};
 use sourmash::sketch::Sketch;
@@ -17,11 +18,11 @@ use sourmash::sketch::Sketch;
 enum Cli {
     Gather {
         /// Query signature
-        #[structopt(parse(from_os_str))]
+        #[structopt(parse(from_str))]
         query_path: PathBuf,
 
         /// Precomputed index or list of reference signatures
-        #[structopt(parse(from_os_str))]
+        #[structopt(parse(from_str))]
         siglist: PathBuf,
 
         /// ksize
@@ -37,7 +38,7 @@ enum Cli {
         threshold_bp: usize,
 
         /// The path for output
-        #[structopt(parse(from_os_str), short = "o", long = "output")]
+        #[structopt(parse(from_str), short = "o", long = "output")]
         output: Option<PathBuf>,
 
         /// Is the index a list of signatures?
@@ -54,11 +55,11 @@ enum Cli {
     },
     Index {
         /// The path for output
-        #[structopt(parse(from_os_str))]
+        #[structopt(parse(from_str))]
         output: PathBuf,
 
         /// List of reference signatures
-        #[structopt(parse(from_os_str))]
+        #[structopt(parse(from_str))]
         siglist: PathBuf,
 
         /// ksize
@@ -72,7 +73,7 @@ enum Cli {
 }
 
 fn read_paths<P: AsRef<Path>>(paths_file: P) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    let paths = BufReader::new(File::open(paths_file)?);
+    let paths = BufReader::new(File::open(paths_file.as_ref())?);
     Ok(paths
         .lines()
         .map(|line| {
@@ -102,15 +103,18 @@ fn index<P: AsRef<Path>>(
     let index_sigs = read_paths(siglist)?;
     info!("Loaded {} sig paths in siglist", index_sigs.len());
 
-    let revindex = RevIndex::new(&index_sigs, &template, 0, None, false);
+    todo!("bring back serializing to disk");
+    /*
+    let revindex = RevIndex::new(&index_sigs, &template, 0, None, false)?;
 
     info!("Saving index");
     let wtr = niffler::to_path(
-        output,
+        output.as_ref(),
         niffler::compression::Format::Gzip,
         niffler::compression::Level::One,
     )?;
     serde_json::to_writer(wtr, &revindex)?;
+    */
 
     Ok(())
 }
@@ -161,7 +165,7 @@ fn gather<P: AsRef<Path>>(
         let search_sigs = read_paths(siglist)?;
         info!("Loaded {} sig paths in siglist", search_sigs.len());
 
-        RevIndex::new(&search_sigs, &template, threshold, Some(&queries), preload)
+        RevIndex::new(&search_sigs, &template, threshold, Some(&queries), preload)?
     } else {
         if lazy {
             RevIndex::load(siglist, None)

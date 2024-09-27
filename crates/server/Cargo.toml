@@ -2,17 +2,18 @@
 name = "greyhound-server"
 version = "0.1.0"
 authors = ["Luiz Irber <luiz.irber@gmail.com>"]
+license = "AGPL-3.0-only"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tide = "0.16.0"
-tide-compress = "0.9.0"
-serde = "1.0"
-async-std = { version = "1.10.0", features = ["attributes"] }
-sourmash = { git = "https://github.com/dib-lab/sourmash.git", branch = "greyhound", features = ["experimental", "parallel"]}
-log = "0.4.0"
-thiserror = "1.0"
-structopt = "0.3.0"
-serde_json = "1.0"
+async-std.workspace = true
+camino.workspace = true
+log.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sourmash.workspace = true
+structopt.workspace = true
+thiserror.workspace = true
+tide.workspace = true
