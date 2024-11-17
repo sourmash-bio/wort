@@ -34,7 +34,6 @@ services:
     command: >
       gunicorn -b 0.0.0.0:5000
         --access-logfile -
-        --reload
         "wort.app:create_app()"
     environment:
       PYTHONUNBUFFERED: 'true'
@@ -48,8 +47,8 @@ services:
       - redis
     env_file:
       - env.production
-    volumes:
-      - .:/app/wort
+#    volumes:
+#      - .:/app/wort
 
   redis:
     restart: always

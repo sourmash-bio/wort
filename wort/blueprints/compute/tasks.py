@@ -47,6 +47,7 @@ def compute(sra_id):
                 f"  -o {f.name} "
                 "  - ",
                 shell=True, capture_output=True, check=True,
+                executable="/bin/bash",
             )
         except CalledProcessError as e:
             if e.returncode == 3:
@@ -105,7 +106,7 @@ def compute_genomes(accession, path, name):
                 "sourmash compute -k 21,31,51 "
                 "  --scaled 1000 "
                 "  --track-abundance "
-                "  --name {shlex.quote(name)} "
+                f"  --name {shlex.quote(name)} "
                 f"  -o {f.name} "
                 f"  <(curl {path} | zcat)",
                 shell=True, capture_output=True, check=True,

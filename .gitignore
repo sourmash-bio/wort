@@ -11,6 +11,7 @@ target/
 fabfile.py
 *.wasm
 **/node_modules/*
+dist/
 
 .config/
 .envrc
@@ -27,3 +28,8 @@ machine/*
 nix/*
 nocolors_600k
 package-lock.json
+
+# pixi environments
+.pixi
+
+.direnv
