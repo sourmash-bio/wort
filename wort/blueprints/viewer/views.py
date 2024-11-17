@@ -42,13 +42,15 @@ def view(public_db, dataset_id):
 
         if dataset is not None:
             # Found a hit in DB
-            if dataset.ipfs is not None and public_db == "genomes":
-                return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset.ipfs}")
-            else:
-                # SRA/IMG IPFS links are unreliable, default to s3
-                return view_s3(public_db, dataset_id)
+            #if dataset.ipfs is not None and public_db == "genomes":
+            #    return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset.ipfs}")
+            #else:
+            #    # could do this if egress charges were not so high...
+            #    return view_s3(public_db, dataset_id)
+            return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
     else:
         # Found in cache, redirect
-        return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset_info['ipfs']}")
+        #return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset_info['ipfs']}")
+        return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
 
     return "Dataset not found", 404
