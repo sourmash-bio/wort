@@ -28,6 +28,8 @@ machine/*
 nix/*
 nocolors_600k
 package-lock.json
+
 # pixi environments
 .pixi
 
+.direnv
