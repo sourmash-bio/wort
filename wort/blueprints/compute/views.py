@@ -13,7 +13,7 @@ compute = Blueprint("compute", __name__, template_folder="templates")
 TRACE_DATA_URL = 'https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term={dataset}'
 
 
-def compute_sra(sra_id):
+def compute_sra(sra_id, recompute=False):
     from . import tasks
 
     dataset = Dataset.query.filter_by(id=sra_id).first()
@@ -29,8 +29,13 @@ def compute_sra(sra_id):
         db.session.add(dataset)
         db.session.commit()
 
-    if dataset.computed is not None:
+    if not recompute and dataset.computed is not None:
         return jsonify({"status": "Signature already calculated"}), 202
+
+    if recompute:
+        dataset.computed = None
+        db.session.add(dataset)
+        db.session.commit()
 
     # Not computed yet, send to proper queue
     if dataset.size_MB <= 300:
