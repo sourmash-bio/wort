@@ -78,7 +78,7 @@ def create_app(settings_override=None):
 
         size_TB = current_app.cache.get(f"meta/size_TB")
         if size_TB is None:
-            size_MB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).first()[0]
+            size_MB = Dataset.query.with_entities(func.sum(Dataset.size_MB)).first()[0] or 0
             size_TB = size_MB / 1000. / 1000.
             current_app.cache.set(f"meta/size_TB", size_TB, timeout=86400)
 
