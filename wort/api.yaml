@@ -23,6 +23,7 @@ paths:
         - token: []
       parameters:
         - $ref: '#/components/parameters/sra_id'
+        - $ref: '#/components/parameters/recompute'
       responses:
         '202':
           description: Compute task accepted
@@ -134,3 +135,13 @@ components:
       required: true
       schema:
         type: string
+
+    recompute:
+      name: recompute
+      description: force recompute of already existing dataset
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+

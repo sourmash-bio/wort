@@ -13,6 +13,10 @@ from wort.app import create_celery_app
 celery = create_celery_app()
 
 
+class WorkerRunError(Exception):
+    pass
+
+
 @celery.task
 def compute(sra_id):
     import boto3
@@ -37,7 +41,7 @@ def compute(sra_id):
 
     with NamedTemporaryFile("w+b") as f:
         try:
-            run(
+            result = run(
                 "set -euo pipefail; "
                 f"fastq-dump --disable-multithreading --fasta 0 --skip-technical --readids --read-filter pass --dumpbase --split-spot --clip -Z {sra_id} | "
                 "sourmash compute -k 21,31,51 "
@@ -61,6 +65,11 @@ def compute(sra_id):
             # http://www.pixelbeat.org/programming/sigpipe_handling.html
             elif e.returncode != 141:
                 raise e
+
+        # if file is empty, consider it an error and sift
+        # through logs later to figure out better error control
+        if os.stat(f.name).st_size == 0:
+            raise WorkerRunError(result.stdout)
 
         f.seek(0)
 
@@ -101,7 +110,7 @@ def compute_genomes(accession, path, name):
 
     with NamedTemporaryFile("w+b") as f:
         try:
-            run(
+            result = run(
                 "set -euo pipefail; "
                 "sourmash compute -k 21,31,51 "
                 "  --scaled 1000 "
@@ -119,6 +128,11 @@ def compute_genomes(accession, path, name):
             # http://www.pixelbeat.org/programming/sigpipe_handling.html
             if e.returncode != 141:
                 raise e
+
+        # if file is empty, consider it an error and sift
+        # through logs later to figure out better error control
+        if os.stat(f).st_size == 0:
+            raise WorkerRunError(result.stdout)
 
         f.seek(0)
 
