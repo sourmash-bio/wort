@@ -96,7 +96,7 @@ def create_app(settings_override=None):
             # Not in cache, let's check DB
             dataset = Dataset.query.filter_by(id=dataset_id).first()
 
-            if dataset is not None:
+            if dataset is not None and dataset.computed:
                 # Found a hit in DB
                 dataset_info = {}
                 dataset_info["name"] = dataset_id.upper()
