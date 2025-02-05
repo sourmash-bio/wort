@@ -1,6 +1,4 @@
 import csv
-import os
-from pathlib import Path
 
 from flask import Blueprint, current_app, jsonify, render_template, url_for
 import requests
@@ -42,7 +40,7 @@ def compute_sra(sra_id, recompute=False):
             conn = boto3.client("s3")
             s3 = boto3.resource("s3")
 
-            key_path = Path("sigs") / f"{sra_id}.sig"
+            key_path = f"sigs/{sra_id}.sig"
             try:
                 obj = s3.Object("wort-sra", key_path)
                 obj.load()
