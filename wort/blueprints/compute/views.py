@@ -36,6 +36,7 @@ def compute_sra(sra_id, recompute=False):
         dataset.computed = None
         db.session.add(dataset)
         db.session.commit()
+        current_app.cache.delete(f"sra/{sra_id}")
 
     # Not computed yet, send to proper queue
     if dataset.size_MB <= 300:
