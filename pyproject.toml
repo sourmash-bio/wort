@@ -38,9 +38,7 @@ celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
 
 [tool.pixi.feature.worker.dependencies]
 sourmash-minimal = ">=4.8.5,<4.9"
-
-[tool.pixi.feature.worker.target.linux-64.dependencies]
-sra-tools = ">=3.0.9,<3.1"
+sra-tools = "~=3.2.0"
 
 # Used for installing into worker, as a post-process step
 [tool.pixi.feature.worker.host-dependencies]
@@ -63,8 +61,10 @@ pytest-cov = "*"
 pip = "*"
 
 [tool.pixi.feature.build.dependencies]
-build = "*"
 flit-core = ">=3.2,<4"
+
+[tool.pixi.feature.build.pypi-dependencies]
+build = "*"
 
 [tool.pixi.feature.build.tasks]
 # Create a wheel for installation

@@ -5,5 +5,6 @@
 !wort/
 !pixi.lock
 !config/
+!migrations/
 !wortapp.py
 !pyproject.toml

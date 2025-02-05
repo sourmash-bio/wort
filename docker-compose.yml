@@ -1,21 +1,19 @@
-version: '3.4'
-
 services:
 
   db:
-    restart: always
     image: postgres:9.6-alpine
+    restart: always
     volumes:
       - ./data/postgres-data:/var/lib/postgresql/data
     env_file:
       - env.production
 
   worker:
+    image: ghcr.io/sourmash-bio/wort:worker-main
     build:
       context: .
       dockerfile: Dockerfile
       target: worker
-    image: wort-worker
     env_file:
       - iam/wort_s3.env
     command: >
@@ -26,11 +24,12 @@ services:
              -l INFO -c 1
 
   web:
-    restart: always
+    image: ghcr.io/sourmash-bio/wort:web-main
     build:
       context: .
       dockerfile: Dockerfile
       target: web
+    restart: always
     command: >
       gunicorn -b 0.0.0.0:5000
         --access-logfile -
@@ -40,8 +39,6 @@ services:
       FLASK_APP: 'wortapp.py'
     ports:
       - "8082:5000"
-    links:
-      - db
     depends_on:
       - db
       - redis
