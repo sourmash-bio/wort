@@ -56,8 +56,10 @@ def compute(sra_id):
         except CalledProcessError as e:
             if e.returncode == 3:
                 # Happens when fastq-dump can't find an accession
-                # (might have been removed, redacted, or never uploaded)
-                pass
+                # (might have been removed, redacted, or never uploaded,
+                #  and in some cases need dbGaP permission, like SRR27017016)
+                # stop further processing.
+                return
 
             # We ignore SIGPIPE, since it is informational (and makes sense,
             # it happens because `head` is closed and `fastq-dump` can't pipe
@@ -65,6 +67,8 @@ def compute(sra_id):
             # http://www.pixelbeat.org/programming/sigpipe_handling.html
             elif e.returncode != 141:
                 raise e
+        else:
+            result = result
 
         # if file is empty, consider it an error and sift
         # through logs later to figure out better error control
