@@ -28,6 +28,7 @@ redis = ">=4.5.5,<4.6"
 flask-wtf = ">=1.1.1,<1.2"
 flask-migrate = ">=4.0.4,<4.1"
 flask-login = ">=0.6.2,<0.7"
+flask-shell-ipython = ">=0.5.1,<0.6"
 jsonschema = ">=4.17.3,<4.18"
 openapi-spec-validator = ">=0.5.7,<0.6"
 sentry-sdk = { version = ">=2.10.0,<2.11.0", extras = ["flask", "celery", "sqlalchemy"] }
@@ -47,7 +48,6 @@ pip = "*"
 
 [tool.pixi.feature.dev.pypi-dependencies]
 biopython = ">=1.81,<2"
-flask-shell-ipython = ">=0.5.1,<0.6"
 pandas = ">=2.0.3,<2.1"
 wort = { path = ".", editable = true }
 
