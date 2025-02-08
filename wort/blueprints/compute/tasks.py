@@ -132,6 +132,8 @@ def compute_genomes(accession, path, name):
             # http://www.pixelbeat.org/programming/sigpipe_handling.html
             if e.returncode != 141:
                 raise e
+        else:
+            result = result
 
         # if file is empty, consider it an error and sift
         # through logs later to figure out better error control

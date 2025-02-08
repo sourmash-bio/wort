@@ -77,6 +77,6 @@ RUN echo '/repository/user/default-path = "/home/user/ncbi"' >> ~/.ncbi/user-set
 RUN echo '/repository/user/main/public/cache-disabled = "true"' >> ~/.ncbi/user-settings.mkfg
 RUN echo '/tools/prefetch/download_to_cache = "false"' >> ~/.ncbi/user-settings.mkfg
 
-ENV RAYON_NUM_THREADS 3
+ENV RAYON_NUM_THREADS=3
 ENTRYPOINT ["/bin/bash", "/shell-hook"]
 CMD ["celery", "-A", "wort.blueprints.compute.tasks", "worker", "-Q", "compute_small,compute_medium,genomes", "--without-gossip", "--without-mingle", "--without-heartbeat", "-l", "INFO", "-c", "1"]
