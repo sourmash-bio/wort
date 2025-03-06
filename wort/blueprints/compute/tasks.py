@@ -137,7 +137,7 @@ def compute_genomes(accession, path, name):
 
         # if file is empty, consider it an error and sift
         # through logs later to figure out better error control
-        if os.stat(f).st_size == 0:
+        if os.stat(f.name).st_size == 0:
             raise WorkerRunError(result.stdout)
 
         f.seek(0)
