@@ -13,8 +13,8 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 CELERY_CONFIG = {
     "result_backend": "celery.backends.s3.S3Backend",
 
-    "s3_access_key_id": os.environ["AWS_ACCESS_KEY_ID"],
-    "s3_secret_access_key": os.environ["AWS_SECRET_ACCESS_KEY"],
+    "s3_access_key_id": os.environ.get("AWS_ACCESS_KEY_ID"),
+    "s3_secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
     "s3_bucket": "wort-results",
 
     "task_serializer": "json",
