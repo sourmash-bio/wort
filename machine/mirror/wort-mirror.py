@@ -13,8 +13,8 @@ import shutil
 
 import aiofiles
 import httpx
-from httpx_retries import RetryTransport
 import polars as pl
+from httpx_retries import RetryTransport
 
 
 ARCHIVE_URL = "https://farm.cse.ucdavis.edu/~irber"
@@ -75,6 +75,8 @@ async def main(args):
 
     print(to_mirror_df.collect())
 
+    (args.basedir / "sigs").mkdir(parents=True, exist_ok=True)
+
     async with httpx.AsyncClient(
         timeout=30.0,
         # limits=httpx.Limits(max_connections=args.max_downloaders),
@@ -95,22 +97,25 @@ async def main(args):
                         )
                     )
         except* Exception as eg:
-            print(*[str(e)[:50] for e in eg.exceptions])
+            print(*[str(e)[:80] for e in eg.exceptions])
+            print(len(eg.exceptions))
+        else:
+            # copy manifest
+            if args.dry_run:
+                print(f"download: {manifest_url}")
+                return
 
-        # copy manifest
-        if args.dry_run:
-            print(f"download: {manifest_url}")
-            return
+            async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
+                async with aiofiles.tempfile.NamedTemporaryFile() as f:
+                    async for chnk in response.aiter_raw(1024 * 1024):
+                        await f.write(chnk)
+                    await f.flush()
 
-        async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
-            async with aiofiles.tempfile.NamedTemporaryFile() as f:
-                async for chnk in response.aiter_raw(1024 * 1024):
-                    await f.write(chnk)
-                await f.flush()
-
-                await asyncio.to_thread(
-                    shutil.copyfile, f.name, args.basedir / "SOURMASH-MANIFEST.parquet"
-                )
+                    await asyncio.to_thread(
+                        shutil.copyfile,
+                        f.name,
+                        args.basedir / "SOURMASH-MANIFEST.parquet",
+                    )
 
 
 async def download_sig(location, sha256, basedir, client, limiter, dry_run):
@@ -175,9 +180,17 @@ if __name__ == "__main__":
         help="Calculate sha256 for local files, instead of depending only on filename",
     )
     parser.add_argument(
-        "database", default="img", choices=DATABASES, metavar="database", help=f"Which database to download. Available databases: {', '.join(DATABASES)}"
+        "database",
+        default="img",
+        choices=DATABASES,
+        metavar="database",
+        help=f"Which database to download. Available databases: {', '.join(DATABASES)}",
     )
-    parser.add_argument("basedir", type=pathlib.Path, help="base directory for the mirror (existing or new)")
+    parser.add_argument(
+        "basedir",
+        type=pathlib.Path,
+        help="base directory for the mirror (existing or new)",
+    )
 
     args = parser.parse_args()
 
