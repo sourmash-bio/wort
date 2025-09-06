@@ -18,6 +18,7 @@ import polars as pl
 
 
 ARCHIVE_URL = "https://farm.cse.ucdavis.edu/~irber"
+DATABASES = ["full", "img", "genomes", "sra"]
 
 
 async def main(args):
@@ -170,9 +171,9 @@ if __name__ == "__main__":
         help="Calculate sha256 for local files, instead of depending only on filename",
     )
     parser.add_argument(
-        "database", default="img", choices=["full", "img", "genomes", "sra"]
+        "database", default="img", choices=DATABASES, metavar="database", help=f"Which database to download. Available databases: {', '.join(DATABASES)}"
     )
-    parser.add_argument("basedir", type=pathlib.Path)
+    parser.add_argument("basedir", type=pathlib.Path, help="base directory for the mirror (existing or new)")
 
     args = parser.parse_args()
 
