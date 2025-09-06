@@ -26,7 +26,6 @@ async def main(args):
         pl.scan_parquet(manifest_url)
         .select(["internal_location", "sha256"])
         .unique(subset=["internal_location"])
-        #        .head(5)
     )
 
     limiter = asyncio.Semaphore(args.max_downloaders)
@@ -45,7 +44,6 @@ async def main(args):
         internal_locations = []
         sha256_sums = []
 
-        # async with asyncio.TaskGroup() as tg:
         for location in already_mirrored_locations:
             async with aiofiles.open(args.basedir / location, mode="rb") as f:
                 h = hashlib.new("sha256")
@@ -76,13 +74,13 @@ async def main(args):
 
     print(to_mirror_df.collect())
 
-    try:
-        async with httpx.AsyncClient(
-            timeout=30.0,
-            # limits=httpx.Limits(max_connections=args.max_downloaders),
-            base_url=f"{args.archive_url}/wort-{args.database}/",
-            transport=RetryTransport(),
-        ) as client:
+    async with httpx.AsyncClient(
+        timeout=30.0,
+        # limits=httpx.Limits(max_connections=args.max_downloaders),
+        base_url=f"{args.archive_url}/wort-{args.database}/",
+        transport=RetryTransport(),
+    ) as client:
+        try:
             async with asyncio.TaskGroup() as tg:
                 for location, sha256 in to_mirror_df.collect().iter_rows():
                     tg.create_task(
@@ -95,8 +93,19 @@ async def main(args):
                             args.dry_run,
                         )
                     )
-    except* Exception as eg:
-        print(*[str(e)[:50] for e in eg.exceptions])
+        except* Exception as eg:
+            print(*[str(e)[:50] for e in eg.exceptions])
+
+        # copy manifest
+        async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
+            async with aiofiles.tempfile.NamedTemporaryFile() as f:
+                async for chnk in response.aiter_raw(1024 * 1024):
+                    await f.write(chnk)
+                await f.flush()
+
+                await asyncio.to_thread(
+                    shutil.copyfile, f.name, args.basedir / "SOURMASH-MANIFEST.parquet"
+                )
 
 
 async def download_sig(location, sha256, basedir, client, limiter, dry_run):
@@ -110,7 +119,7 @@ async def download_sig(location, sha256, basedir, client, limiter, dry_run):
             total_bytes = 0
             response.raise_for_status()
             # download to temp location
-            async with aiofiles.tempfile.NamedTemporaryFile(delete=False) as f:
+            async with aiofiles.tempfile.NamedTemporaryFile() as f:
                 async for chnk in response.aiter_raw(1024 * 1024):
                     h.update(chnk)
                     await f.write(chnk)
@@ -124,8 +133,6 @@ async def download_sig(location, sha256, basedir, client, limiter, dry_run):
                 await f.flush()
 
                 # move to final location
-                ## TODO: the goal here is to avoid incomplete downloads,
-                ## but I'm still getting incomplete files =/
                 print(f"completed {location}, {total_bytes:,} bytes")
                 await asyncio.to_thread(shutil.copyfile, f.name, basedir / location)
 
@@ -135,11 +142,33 @@ if __name__ == "__main__":
     import asyncio
     import pathlib
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dry-run", default=True, action="store_true")
-    parser.add_argument("-a", "--archive-url", default=ARCHIVE_URL)
-    parser.add_argument("-m", "--max-downloaders", type=int, default=30)
-    parser.add_argument("-f", "--full-check", default=False, action="store_true")
+    parser = argparse.ArgumentParser(
+        description="A tool for mirroring wort data from the main archive"
+    )
+    parser.add_argument(
+        "-d",
+        "--dry-run",
+        default=True,
+        action="store_true",
+        help="Skip download, useful to check what would be downloaded",
+    )
+    parser.add_argument(
+        "-a", "--archive-url", default=ARCHIVE_URL, help="Base URL for the main archive"
+    )
+    parser.add_argument(
+        "-m",
+        "--max-downloaders",
+        type=int,
+        default=30,
+        help="Maximum number of downloads to execute concurrently",
+    )
+    parser.add_argument(
+        "-f",
+        "--full-check",
+        default=False,
+        action="store_true",
+        help="Calculate sha256 for local files, instead of depending only on filename",
+    )
     parser.add_argument(
         "database", default="img", choices=["full", "img", "genomes", "sra"]
     )
