@@ -98,6 +98,10 @@ async def main(args):
             print(*[str(e)[:50] for e in eg.exceptions])
 
         # copy manifest
+        if args.dry_run:
+            print(f"download: {manifest_url}")
+            return
+
         async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
             async with aiofiles.tempfile.NamedTemporaryFile() as f:
                 async for chnk in response.aiter_raw(1024 * 1024):
@@ -149,7 +153,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--dry-run",
-        default=True,
+        default=False,
         action="store_true",
         help="Skip download, useful to check what would be downloaded",
     )
