@@ -25,8 +25,9 @@ async def main(args):
     manifest_url = f"{args.archive_url}/wort-{args.database}/SOURMASH-MANIFEST.parquet"
     manifest_df = (
         pl.scan_parquet(manifest_url)
-        .select(["internal_location", "sha256"])
         .unique(subset=["internal_location"])
+        .filter(pl.col("creation_date") > args.since)
+        .select(["internal_location", "sha256"])
     )
 
     limiter = asyncio.Semaphore(args.max_downloaders)
@@ -105,6 +106,7 @@ async def main(args):
                 print(f"download: {manifest_url}")
                 return
 
+            # TODO: save full manifest, or only consider "since"?
             async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
                 async with aiofiles.tempfile.NamedTemporaryFile() as f:
                     async for chnk in response.aiter_raw(1024 * 1024):
@@ -150,6 +152,7 @@ async def download_sig(location, sha256, basedir, client, limiter, dry_run):
 if __name__ == "__main__":
     import argparse
     import asyncio
+    import datetime
     import pathlib
 
     parser = argparse.ArgumentParser(
@@ -178,6 +181,13 @@ if __name__ == "__main__":
         default=False,
         action="store_true",
         help="Calculate sha256 for local files, instead of depending only on filename",
+    )
+    parser.add_argument(
+        "-s",
+        "--since",
+        default=datetime.datetime.strptime("1900-01-01", "%Y-%m-%d"),
+        type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d"),
+        help="Only mirror signatures added since this date",
     )
     parser.add_argument(
         "database",

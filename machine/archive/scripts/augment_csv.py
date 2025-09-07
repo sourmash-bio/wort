@@ -25,10 +25,13 @@ def main(args):
         "filename": [],
     }
     with args.s3_metadata.open() as f:
-        _ = next(f)
-
         for line in f:
-            date, time, size, filename = line.strip().split()
+            try:
+                date, time, size, filename = line.strip().split()
+            except:
+                print(f"skipping line {line}")
+                continue
+
             dt = datetime(
                 *[int(v) for v in date.split("/")], *[int(v) for v in time.split(":")]
             )
@@ -53,7 +56,11 @@ def main(args):
             pl.col("internal_location").str.strip_prefix(args.basepath)
         )
 
+    print(f"after join sha256:\n{df.head(5).collect()}")
+
     df = df.join(s3_metadata_df, left_on="internal_location", right_on="filename")
+
+    print(f"after join S3:\n{df.head(5).collect()}")
 
     match args.format:
         case "parquet":
