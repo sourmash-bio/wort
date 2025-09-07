@@ -33,12 +33,9 @@ async def main(args):
     limiter = asyncio.Semaphore(args.max_downloaders)
 
     already_mirrored_locations = set()
-    async with limiter:
-        for root, dirs, files in args.basedir.walk(top_down=True):
-            for name in files:
-                already_mirrored_locations.add(
-                    str(root.relative_to(args.basedir) / name)
-                )
+    for root, dirs, files in args.basedir.walk(top_down=True):
+        for name in files:
+            already_mirrored_locations.add(str(root.relative_to(args.basedir) / name))
     print(len(already_mirrored_locations))
 
     if args.full_check:
@@ -47,14 +44,15 @@ async def main(args):
         sha256_sums = []
 
         for location in already_mirrored_locations:
-            async with aiofiles.open(args.basedir / location, mode="rb") as f:
-                h = hashlib.new("sha256")
-                while (chnk := await f.read(1024 * 1024)) != b"":
-                    h.update(chnk)
-                sha256 = h.hexdigest()
+            async with limiter:
+                async with aiofiles.open(args.basedir / location, mode="rb") as f:
+                    h = hashlib.new("sha256")
+                    while (chnk := await f.read(1024 * 1024)) != b"":
+                        h.update(chnk)
+                    sha256 = h.hexdigest()
 
-                internal_locations.append(location)
-                sha256_sums.append(sha256)
+                    internal_locations.append(location)
+                    sha256_sums.append(sha256)
     else:
         internal_locations = list(already_mirrored_locations)
 
@@ -76,7 +74,8 @@ async def main(args):
 
     print(to_mirror_df.collect())
 
-    (args.basedir / "sigs").mkdir(parents=True, exist_ok=True)
+    if not args.dry_run:
+        (args.basedir / "sigs").mkdir(parents=True, exist_ok=True)
 
     async with httpx.AsyncClient(
         timeout=30.0,
@@ -187,7 +186,7 @@ if __name__ == "__main__":
         "--since",
         default=datetime.datetime.strptime("1900-01-01", "%Y-%m-%d"),
         type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d"),
-        help="Only mirror signatures added since this date",
+        help="Only mirror signatures added since this date. Default: 1900-01-01",
     )
     parser.add_argument(
         "database",
