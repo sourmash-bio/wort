@@ -11,13 +11,22 @@
 
 import hashlib
 import shutil
+from multiprocessing import Value
 
 import aiofiles
 import httpx
 import polars as pl
 from httpx_retries import RetryTransport
-from rich.progress import Progress, track
-
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TaskID,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+    track,
+)
 
 ARCHIVE_URL = "https://farm.cse.ucdavis.edu/~irber"
 DATABASES = ["full", "img", "genomes", "sra"]
@@ -38,15 +47,18 @@ async def main(args):
     for root, dirs, files in args.basedir.walk(top_down=True):
         for name in files:
             already_mirrored_locations.add(str(root.relative_to(args.basedir) / name))
-    #print(len(already_mirrored_locations))
-
+    # print(len(already_mirrored_locations))
 
     if args.full_check:
         # check sha56
         internal_locations = []
         sha256_sums = []
 
-        for location in track(already_mirrored_locations, description="sha256", total=len(already_mirrored_locations)):
+        for location in track(
+            already_mirrored_locations,
+            description="sha256",
+            total=len(already_mirrored_locations),
+        ):
             async with limiter:
                 async with aiofiles.open(args.basedir / location, mode="rb") as f:
                     h = hashlib.new("sha256")
@@ -59,7 +71,7 @@ async def main(args):
     else:
         internal_locations = list(already_mirrored_locations)
 
-    #print(f"{len(internal_locations)} sha256 calculated")
+    # print(f"{len(internal_locations)} sha256 calculated")
 
     already_mirrored = {"internal_location": internal_locations}
     join_columns = ["internal_location"]
@@ -71,27 +83,47 @@ async def main(args):
         join_columns.append("sha256")
 
     already_mirrored_df = pl.from_dict(already_mirrored, schema=schema).lazy()
-    #print(already_mirrored_df.collect())
+    # print(already_mirrored_df.collect())
 
     to_mirror_df = manifest_df.join(already_mirrored_df, on=join_columns, how="anti")
 
-    #print(to_mirror_df.collect())
+    # print(to_mirror_df.collect())
 
     if not args.dry_run:
         (args.basedir / "sigs").mkdir(parents=True, exist_ok=True)
 
     total_tasks = to_mirror_df.select(pl.len()).collect().item()
+    current_tasks = Value("i", 0)
     total_bytes = to_mirror_df.select("size").sum().collect().item()
-    #print(total_bytes, total_tasks)
+    # print(total_bytes, total_tasks)
     async with httpx.AsyncClient(
         timeout=30.0,
         # limits=httpx.Limits(max_connections=args.max_downloaders),
         base_url=f"{args.archive_url}/wort-{args.database}/",
         transport=RetryTransport(),
     ) as client:
-        with Progress() as progress:
-            task_bytes = progress.add_task("[green]Downloading (bytes)", total=total_bytes)
-            task_njobs = progress.add_task("[green]Downloading (completed)", total=total_tasks)
+        with Progress(
+            TextColumn("{task.description}", justify="left"),
+            BarColumn(bar_width=None),
+            TextColumn(
+                "sigs: [bold green]{task.fields[task_count].value} / [bold_blue]{task.fields[task_total]}",
+                justify="right",
+            ),
+            "•",
+            "[progress.percentage]{task.percentage:>3.1f}%",
+            "•",
+            DownloadColumn(),
+            "•",
+            TransferSpeedColumn(),
+            "•",
+            TimeRemainingColumn(),
+        ) as progress:
+            task_bytes = progress.add_task(
+                "[green]Downloading",
+                total=total_bytes,
+                task_count=current_tasks,
+                task_total=total_tasks,
+            )
             try:
                 async with asyncio.TaskGroup() as tg:
                     for location, sha256, size in to_mirror_df.collect().iter_rows():
@@ -105,7 +137,7 @@ async def main(args):
                                 args.dry_run,
                                 progress,
                                 task_bytes,
-                                task_njobs,
+                                current_tasks,
                             )
                         )
             except* Exception as eg:
@@ -118,7 +150,9 @@ async def main(args):
                     return
 
                 # TODO: save full manifest, or only consider "since"?
-                async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
+                async with client.stream(
+                    "GET", "SOURMASH-MANIFEST.parquet"
+                ) as response:
                     async with aiofiles.tempfile.NamedTemporaryFile() as f:
                         async for chnk in response.aiter_raw(1024 * 1024):
                             await f.write(chnk)
@@ -128,14 +162,25 @@ async def main(args):
                             shutil.copyfile,
                             f.name,
                             args.basedir / "SOURMASH-MANIFEST.parquet",
-                    )
+                        )
 
 
-async def download_sig(location, sha256, basedir, client, limiter, dry_run, progress, task_bytes, task_njobs):
+async def download_sig(
+    location,
+    sha256,
+    basedir,
+    client,
+    limiter,
+    dry_run,
+    progress,
+    task_bytes,
+    current_tasks,
+):
     async with limiter:
         if dry_run:
             progress.console.print(f"download: {location}")
-            progress.update(task_njobs, advance=1)
+            with current_tasks.get_lock():
+                current_tasks.value += 1
             return
 
         async with client.stream("GET", location) as response:
@@ -152,7 +197,9 @@ async def download_sig(location, sha256, basedir, client, limiter, dry_run, prog
                 if sha256 != h.hexdigest():
                     # TODO: raise exception, download failed?
                     #       or maybe retry?
-                    progress.console.print(f"download failed! expected {sha256}, got {h.hexdigest()}")
+                    progress.console.print(
+                        f"download failed! expected {sha256}, got {h.hexdigest()}"
+                    )
 
                 await f.flush()
 
@@ -161,7 +208,8 @@ async def download_sig(location, sha256, basedir, client, limiter, dry_run, prog
                 await asyncio.to_thread(shutil.copyfile, f.name, basedir / location)
 
             progress.update(task_bytes, advance=total_bytes)
-            progress.update(task_njobs, advance=1)
+            with current_tasks.get_lock():
+                current_tasks.value += 1
 
 
 if __name__ == "__main__":
