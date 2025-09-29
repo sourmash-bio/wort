@@ -9,6 +9,7 @@
 # ]
 # ///
 
+import asyncio
 import hashlib
 import shutil
 from multiprocessing import Value
@@ -32,6 +33,27 @@ ARCHIVE_URL = "https://farm.cse.ucdavis.edu/~irber"
 DATABASES = ["full", "img", "genomes", "sra"]
 
 
+# From https://discuss.python.org/t/boundedtaskgroup-to-control-parallelism/27171
+class BoundedTaskGroup(asyncio.TaskGroup):
+    def __init__(self, *args, max_parallelism=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        if max_parallelism:
+            self._sem = asyncio.Semaphore(max_parallelism)
+        else:
+            self._sem = None
+
+    def create_task(self, coro, *args, **kwargs):
+        if self._sem:
+
+            async def _wrapped_coro(sem, coro):
+                async with sem:
+                    return await coro
+
+            coro = _wrapped_coro(self._sem, coro)
+
+        return super().create_task(coro, *args, **kwargs)
+
+
 async def main(args):
     manifest_url = f"{args.archive_url}/wort-{args.database}/SOURMASH-MANIFEST.parquet"
     manifest_df = (
@@ -40,8 +62,6 @@ async def main(args):
         .filter(pl.col("creation_date") > args.since)
         .select(["internal_location", "sha256", "size"])
     )
-
-    limiter = asyncio.Semaphore(args.max_downloaders)
 
     already_mirrored_locations = set()
     for root, dirs, files in args.basedir.walk(top_down=True):
@@ -54,6 +74,7 @@ async def main(args):
         internal_locations = []
         sha256_sums = []
 
+        limiter = asyncio.Semaphore(args.max_downloaders)
         for location in track(
             already_mirrored_locations,
             description="sha256",
@@ -83,11 +104,8 @@ async def main(args):
         join_columns.append("sha256")
 
     already_mirrored_df = pl.from_dict(already_mirrored, schema=schema).lazy()
-    # print(already_mirrored_df.collect())
 
     to_mirror_df = manifest_df.join(already_mirrored_df, on=join_columns, how="anti")
-
-    # print(to_mirror_df.collect())
 
     if not args.dry_run:
         (args.basedir / "sigs").mkdir(parents=True, exist_ok=True)
@@ -106,7 +124,7 @@ async def main(args):
             TextColumn("{task.description}", justify="left"),
             BarColumn(bar_width=None),
             TextColumn(
-                "sigs: [bold green]{task.fields[task_count].value} / [bold_blue]{task.fields[task_total]}",
+                "[bold green]{task.fields[task_count].value} / [bold_blue]{task.fields[task_total]}",
                 justify="right",
             ),
             "•",
@@ -125,7 +143,7 @@ async def main(args):
                 task_total=total_tasks,
             )
             try:
-                async with asyncio.TaskGroup() as tg:
+                async with BoundedTaskGroup(max_parallelism=args.max_downloaders) as tg:
                     for location, sha256, size in to_mirror_df.collect().iter_rows():
                         tg.create_task(
                             download_sig(
@@ -133,7 +151,6 @@ async def main(args):
                                 sha256,
                                 args.basedir,
                                 client,
-                                limiter,
                                 args.dry_run,
                                 progress,
                                 task_bytes,
@@ -170,51 +187,48 @@ async def download_sig(
     sha256,
     basedir,
     client,
-    limiter,
     dry_run,
     progress,
     task_bytes,
     current_tasks,
 ):
-    async with limiter:
-        if dry_run:
-            progress.console.print(f"download: {location}")
-            with current_tasks.get_lock():
-                current_tasks.value += 1
-            return
+    if dry_run:
+        progress.console.print(f"download: {location}")
+        with current_tasks.get_lock():
+            current_tasks.value += 1
+        return
 
-        async with client.stream("GET", location) as response:
-            h = hashlib.new("sha256")
-            total_bytes = 0
-            response.raise_for_status()
-            # download to temp location
-            async with aiofiles.tempfile.NamedTemporaryFile() as f:
-                async for chnk in response.aiter_raw(1024 * 1024):
-                    h.update(chnk)
-                    await f.write(chnk)
-                    total_bytes += len(chnk)
+    async with client.stream("GET", location) as response:
+        h = hashlib.new("sha256")
+        total_bytes = 0
+        response.raise_for_status()
+        # download to temp location
+        async with aiofiles.tempfile.NamedTemporaryFile() as f:
+            async for chnk in response.aiter_raw(1024 * 1024):
+                h.update(chnk)
+                await f.write(chnk)
+                total_bytes += len(chnk)
 
-                if sha256 != h.hexdigest():
-                    # TODO: raise exception, download failed?
-                    #       or maybe retry?
-                    progress.console.print(
-                        f"download failed! expected {sha256}, got {h.hexdigest()}"
-                    )
+            if sha256 != h.hexdigest():
+                # TODO: raise exception, download failed?
+                #       or maybe retry?
+                progress.console.print(
+                    f"download failed! expected {sha256}, got {h.hexdigest()}"
+                )
 
-                await f.flush()
+            await f.flush()
 
-                # move to final location
-                progress.console.print(f"completed {location}, {total_bytes:,} bytes")
-                await asyncio.to_thread(shutil.copyfile, f.name, basedir / location)
+            # move to final location
+            progress.console.print(f"completed {location}, {total_bytes:,} bytes")
+            await asyncio.to_thread(shutil.copyfile, f.name, basedir / location)
 
-            progress.update(task_bytes, advance=total_bytes)
-            with current_tasks.get_lock():
-                current_tasks.value += 1
+        progress.update(task_bytes, advance=total_bytes)
+        with current_tasks.get_lock():
+            current_tasks.value += 1
 
 
 if __name__ == "__main__":
     import argparse
-    import asyncio
     import datetime
     import pathlib
 
