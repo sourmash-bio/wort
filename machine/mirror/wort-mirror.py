@@ -11,6 +11,7 @@
 
 import asyncio
 import hashlib
+import itertools as it
 import shutil
 from multiprocessing import Value
 
@@ -142,44 +143,45 @@ async def main(args):
                 task_count=current_tasks,
                 task_total=total_tasks,
             )
-            try:
-                async with BoundedTaskGroup(max_parallelism=args.max_downloaders) as tg:
-                    for location, sha256, size in to_mirror_df.collect().iter_rows():
-                        tg.create_task(
-                            download_sig(
-                                location,
-                                sha256,
-                                args.basedir,
-                                client,
-                                args.dry_run,
-                                progress,
-                                task_bytes,
-                                current_tasks,
+            for chnk in it.batched(to_mirror_df.collect().iter_rows(), n=10_000):
+                try:
+                    async with BoundedTaskGroup(
+                        max_parallelism=args.max_downloaders
+                    ) as tg:
+                        for location, sha256, size in chnk:
+                            tg.create_task(
+                                download_sig(
+                                    location,
+                                    sha256,
+                                    args.basedir,
+                                    client,
+                                    args.dry_run,
+                                    progress,
+                                    task_bytes,
+                                    current_tasks,
+                                )
                             )
-                        )
-            except* Exception as eg:
-                print(*[str(e)[:80] for e in eg.exceptions])
-                print(len(eg.exceptions))
-            else:
-                # copy manifest
-                if args.dry_run:
-                    print(f"download: {manifest_url}")
-                    return
+                except* Exception as eg:
+                    print(*[str(e)[:80] for e in eg.exceptions])
+                    print(len(eg.exceptions))
 
-                # TODO: save full manifest, or only consider "since"?
-                async with client.stream(
-                    "GET", "SOURMASH-MANIFEST.parquet"
-                ) as response:
-                    async with aiofiles.tempfile.NamedTemporaryFile() as f:
-                        async for chnk in response.aiter_raw(1024 * 1024):
-                            await f.write(chnk)
-                        await f.flush()
+            # copy manifest
+            if args.dry_run:
+                print(f"download: {manifest_url}")
+                return
 
-                        await asyncio.to_thread(
-                            shutil.copyfile,
-                            f.name,
-                            args.basedir / "SOURMASH-MANIFEST.parquet",
-                        )
+            # TODO: save full manifest, or only consider "since"?
+            async with client.stream("GET", "SOURMASH-MANIFEST.parquet") as response:
+                async with aiofiles.tempfile.NamedTemporaryFile() as f:
+                    async for chnk in response.aiter_raw(1024 * 1024):
+                        await f.write(chnk)
+                    await f.flush()
+
+                    await asyncio.to_thread(
+                        shutil.copyfile,
+                        f.name,
+                        args.basedir / "SOURMASH-MANIFEST.parquet",
+                    )
 
 
 async def download_sig(
