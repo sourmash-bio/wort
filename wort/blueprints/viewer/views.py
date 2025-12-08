@@ -11,7 +11,13 @@ def view_s3(public_db, dataset_id):
 
     import boto3
 
-    conn = boto3.client("s3")
+    conn = boto3.client(
+        service_name="s3",
+        endpoint_url=current_app.config["SIG_STORAGE_ENDPOINT_URL"],
+        aws_access_key_id=current_app.config["SIG_STORAGE_ACCESS_KEY_ID"],
+        aws_secret_access_key=current_app.config["SIG_STORAGE_SECRET_ACCESS_KEY"],
+        region_name="auto",
+    )
 
     key = f"sigs/{dataset_id}.sig"
 
@@ -20,6 +26,7 @@ def view_s3(public_db, dataset_id):
         "Key": key,
         "ResponseContentType": "application/json",
         "ResponseContentEncoding": "gzip",
+        "ResponseContentDisposition": f'attachment; filename="{dataset_id}.sig"',
     }
 
     url = conn.generate_presigned_url("get_object", Params=params, ExpiresIn=100)
@@ -46,11 +53,12 @@ def view(public_db, dataset_id):
             #    return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset.ipfs}")
             #else:
             #    # could do this if egress charges were not so high...
-            #    return view_s3(public_db, dataset_id)
-            return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
+            return view_s3(public_db, dataset_id)
+            #return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
     else:
         # Found in cache, redirect
         #return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset_info['ipfs']}")
-        return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
+        return view_s3(public_db, dataset_id)
+        #return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
 
     return "Dataset not found", 404
