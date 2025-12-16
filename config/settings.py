@@ -9,6 +9,10 @@ SQLALCHEMY_DATABASE_URI = os.path.expandvars(
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+SIG_STORAGE_ACCESS_KEY_ID = os.environ.get("SIG_STORAGE_ACCESS_KEY_ID")
+SIG_STORAGE_SECRET_ACCESS_KEY = os.environ.get("SIG_STORAGE_SECRET_ACCESS_KEY")
+SIG_STORAGE_ENDPOINT_URL = os.environ.get("SIG_STORAGE_ENDPOINT_URL")
+
 # Celery SQS
 CELERY_CONFIG = {
     "result_backend": "celery.backends.s3.S3Backend",

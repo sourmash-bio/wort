@@ -11,7 +11,7 @@ classifiers = ["License :: OSI Approved :: GNU Affero General Public License v3"
 version = "0.0.2"
 requires-python = ">=3.10"
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "linux-aarch64"]
 
@@ -20,6 +20,7 @@ curl = ">=8.5.0,<8.6"
 pycurl = ">=7.45.1,<7.46"
 cachelib = ">=0.10.2,<0.11"
 psycopg2-binary = ">=2.9.9,<2.10"
+pip = "*"
 
 [tool.pixi.feature.web.pypi-dependencies]
 gunicorn = ">=20.1.0,<20.2"
@@ -28,7 +29,7 @@ redis = ">=4.5.5,<4.6"
 flask-wtf = ">=1.1.1,<1.2"
 flask-migrate = ">=4.0.4,<4.1"
 flask-login = ">=0.6.2,<0.7"
-flask-shell-ipython = ">=0.5.1,<0.6"
+flask-shell-ipython = ">=0.5.3,<0.6"
 jsonschema = ">=4.17.3,<4.18"
 openapi-spec-validator = ">=0.5.7,<0.6"
 sentry-sdk = { version = ">=2.10.0,<2.11.0", extras = ["flask", "celery", "sqlalchemy"] }
@@ -39,11 +40,9 @@ celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
 [tool.pixi.feature.worker.dependencies]
 sourmash-minimal = ">=4.8.5,<4.9"
 sra-tools = "~=3.2.0"
-
-# Used for installing into worker, as a post-process step
-[tool.pixi.feature.worker.host-dependencies]
 pip = "*"
 
+# Used for installing into worker, as a post-process step
 [tool.pixi.feature.dev.pypi-dependencies]
 biopython = ">=1.81,<2"
 pandas = ">=2.0.3,<2.1"
@@ -57,9 +56,6 @@ pytest = "*"
 pytest-cov = "*"
 
 # Used for installing into web, as a post-process step
-[tool.pixi.feature.web.host-dependencies]
-pip = "*"
-
 [tool.pixi.feature.build.dependencies]
 flit-core = ">=3.2,<4"
 
@@ -86,4 +82,4 @@ worker = { features = ["worker", "web"], solve-group = "default" }
 
 [tool.pixi.system-requirements]
 linux = "3.10"
-libc = "2.17"
+libc = "2.24"
