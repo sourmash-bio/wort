@@ -52,10 +52,9 @@ def view(public_db, dataset_id):
         # TODO: need to check for dataset_info.computed to see if we
         #       actually have a signature before redirecting!
 
-        # only genomes and img copied over to de.NBI
-        if public_db in ("genomes", "img"):
-            return view_s3(public_db, dataset_id)
+        # sigs in de.NBI are public, so we don't need to create a presigned URL
+        # return view_s3(public_db, dataset_id)
 
-        return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
+        return redirect(f"https://s3.bi.denbi.de/wort-{public_db}/sigs/{dataset_id}.sig")
 
     return "Dataset not found", 404
