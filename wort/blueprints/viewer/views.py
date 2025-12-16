@@ -2,7 +2,6 @@ from flask import Blueprint, current_app, jsonify, redirect, render_template
 
 viewer = Blueprint("viewer", __name__, template_folder="templates")
 
-
 # @viewer.route("/view/<db>/<dataset_id>")
 def view_s3(public_db, dataset_id):
 
@@ -39,26 +38,24 @@ def view(public_db, dataset_id):
     if public_db not in ("sra", "img", "genomes"):
         return "Database not supported", 404
 
+    # Check if we have the info in cache
     dataset_info = current_app.cache.get(f"{public_db}/{dataset_id}")
-
     if dataset_info is None:
+        # Not in cache, let's check DB
         from wort.models import Dataset
 
-        # Not in cache, let's check DB
-        dataset = Dataset.query.filter_by(id=dataset_id).first()
+        dataset_info = Dataset.query.filter_by(id=dataset_id).first()
 
-        if dataset is not None:
-            # Found a hit in DB
-            #if dataset.ipfs is not None and public_db == "genomes":
-            #    return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset.ipfs}")
-            #else:
-            #    # could do this if egress charges were not so high...
+    if dataset_info is not None:
+        # Found a hit in DB or cache
+
+        # TODO: need to check for dataset_info.computed to see if we
+        #       actually have a signature before redirecting!
+
+        # only genomes and img copied over to de.NBI
+        if public_db in ("genomes", "img"):
             return view_s3(public_db, dataset_id)
-            #return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
-    else:
-        # Found in cache, redirect
-        #return redirect(f"https://cloudflare-ipfs.com/ipfs/{dataset_info['ipfs']}")
-        return view_s3(public_db, dataset_id)
-        #return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
+
+        return redirect(f"https://farm.cse.ucdavis.edu/~irber/wort-{public_db}/sigs/{dataset_id}.sig")
 
     return "Dataset not found", 404
