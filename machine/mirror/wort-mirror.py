@@ -30,7 +30,7 @@ from rich.progress import (
     track,
 )
 
-ARCHIVE_URL = "https://farm.cse.ucdavis.edu/~irber"
+ARCHIVE_URL = "https://s3.bi.denbi.de"
 DATABASES = ["full", "img", "genomes", "sra"]
 
 
