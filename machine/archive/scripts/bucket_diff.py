@@ -50,7 +50,9 @@ async def download_original(client, location):
 
 
 async def upload_mirror(client, data, location):
-    return await client._pipe_file(location, data)
+    return await client._pipe_file(
+        location, data, ContentType="application/json", ContentEncoding="gzip"
+    )
 
 
 def download_current_manifest(args):
@@ -99,6 +101,8 @@ async def main(original_listing, current_manifest, db):
     )
 
     manifest_records = {}
+    manifest_lock = asyncio.Lock()
+
     download_session = await download_fs.set_session()
     upload_session = await upload_fs.set_session()
 
@@ -106,29 +110,12 @@ async def main(original_listing, current_manifest, db):
         for key, etag, last_modified, type, size, storage_class in (
             diff.filter(pl.col.key.is_in(TEST_DATASETS)).collect().iter_rows()
         ):
-            s3_path = f"s3://wort-{db}/{key}"
+            records = await process_sig(
+                db, key, upload_fs, download_fs, etag, size, last_modified
+            )
+            async with manifest_lock:
+                manifest_records[key] = records
 
-            # before downloading, do a head() in mirror
-            # and check if etag/size match
-            # with this we can avoid re-uploading
-            mirror_info = await upload_fs._info(s3_path)
-            uploaded = mirror_info["ETag"] == etag and mirror_info["size"] == size
-
-            src_fs = download_fs
-            if uploaded:
-                # let's download from mirror, it's cheaper =P
-                src_fs = upload_fs
-
-            (data, sha256) = await download_original(src_fs, s3_path)
-
-            raw_sig = data.getvalue()
-            sig = load_signatures(raw_sig)
-
-            records = extract_record(sig, key, sha256, last_modified, size)
-            manifest_records[key] = records
-
-            if not uploaded:
-                _result = await upload_mirror(upload_fs, raw_sig, s3_path)
     finally:
         await download_session.close()
         await upload_session.close()
@@ -150,6 +137,36 @@ async def main(original_listing, current_manifest, db):
     )
 
     return new_manifest, diff
+
+
+async def process_sig(db, key, upload_fs, download_fs, etag, size, last_modified):
+    s3_path = f"s3://wort-{db}/{key}"
+
+    # before downloading, do a head() in mirror
+    # and check if etag/size match
+    # with this we can avoid re-uploading
+    try:
+        mirror_info = await upload_fs._info(s3_path)
+    except FileNotFoundError:
+        uploaded = False
+    else:
+        uploaded = mirror_info["ETag"] == etag and mirror_info["size"] == size
+
+    # if data is already in mirror, let's download from it instead
+    src_fs = download_fs
+    if uploaded:
+        src_fs = upload_fs
+
+    (data, sha256) = await download_original(src_fs, s3_path)
+
+    raw_sig = data.getvalue()
+    sig = load_signatures(raw_sig)
+
+    records = extract_record(sig, key, sha256, last_modified, size)
+    if not uploaded:
+        _result = await upload_mirror(upload_fs, raw_sig, s3_path)
+
+    return records
 
 
 if __name__ == "__main__":
