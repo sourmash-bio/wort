@@ -2,6 +2,7 @@
 # requires-python = ">=3.12"
 # dependencies = [
 #     "polars",
+#     "rich",
 #     "s3fs",
 #     "sourmash",
 # ]
@@ -11,11 +12,19 @@ import asyncio
 import io
 import hashlib
 from datetime import datetime
-from itertools import chain
-from pprint import pprint
+from itertools import chain, batched
+from multiprocessing import Value
 
 import s3fs
 import polars as pl
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
 
 from sourmash.manifest import BaseCollectionManifest
 from sourmash import load_signatures
@@ -101,30 +110,76 @@ async def main(original_listing, current_manifest, db):
     )
 
     manifest_records = {}
-    manifest_lock = asyncio.Lock()
+    task_lock = asyncio.Lock()
 
     download_session = await download_fs.set_session()
     upload_session = await upload_fs.set_session()
 
-    try:
-        for key, etag, last_modified, type, size, storage_class in (
-            diff.filter(pl.col.key.is_in(TEST_DATASETS)).collect().iter_rows()
-        ):
-            records = await process_sig(
-                db, key, upload_fs, download_fs, etag, size, last_modified
-            )
-            async with manifest_lock:
-                manifest_records[key] = records
+    total_tasks = diff.select(pl.len()).collect().item()
+    total_bytes = diff.select("size").sum().collect().item()
 
-    finally:
-        await download_session.close()
-        await upload_session.close()
+    current_tasks = Value("i", 0)
+    with Progress(
+        TextColumn("{task.description}", justify="left"),
+        BarColumn(bar_width=None),
+        TextColumn(
+            "[bold green]{task.fields[task_count].value} / [bold_blue]{task.fields[task_total]}",
+            justify="right",
+        ),
+        "•",
+        "[progress.percentage]{task.percentage:>3.1f}%",
+        "•",
+        DownloadColumn(),
+        "•",
+        TransferSpeedColumn(),
+        "•",
+        TimeRemainingColumn(),
+    ) as progress:
+        task_bytes = progress.add_task(
+            "[green]Downloading",
+            total=total_bytes,
+            task_count=current_tasks,
+            task_total=total_tasks,
+        )
+        try:
+            for chnk in batched(
+                # diff.filter(pl.col.key.is_in(TEST_DATASETS)).collect().iter_rows()
+                diff.collect().iter_rows(),
+                n=100,
+            ):
+                tasks = {}
+                async with asyncio.TaskGroup() as tg:
+                    for key, etag, last_modified, type, size, storage_class in chnk:
+                        task = tg.create_task(
+                            process_sig(
+                                db,
+                                key,
+                                upload_fs,
+                                download_fs,
+                                etag,
+                                size,
+                                last_modified,
+                                current_tasks,
+                                progress,
+                                task_bytes,
+                            )
+                        )
+                        async with task_lock:
+                            tasks[key] = task
 
+                for key, task in tasks.items():
+                    records = task.result()
+                    manifest_records[key] = records
+        except* Exception as eg:
+            print(*[str(e)[:80] for e in eg.exceptions])
+            print(len(eg.exceptions))
+        finally:
+            await download_session.close()
+            await upload_session.close()
+
+    # merge new manifest_records into current_manifest
+    # note: will have three records per location!
     new_rows = list(chain.from_iterable(manifest_records.values()))
-    print(len(new_rows))
-    pprint(new_rows)
-    # TODO: merge new manifest_records into current_manifest
-    #       note: will have three records per location!
     new_records = pl.DataFrame(
         new_rows, schema=current_manifest.collect_schema()
     ).lazy()
@@ -139,7 +194,18 @@ async def main(original_listing, current_manifest, db):
     return new_manifest, diff
 
 
-async def process_sig(db, key, upload_fs, download_fs, etag, size, last_modified):
+async def process_sig(
+    db,
+    key,
+    upload_fs,
+    download_fs,
+    etag,
+    size,
+    last_modified,
+    current_tasks,
+    progress,
+    task_bytes,
+):
     s3_path = f"s3://wort-{db}/{key}"
 
     # before downloading, do a head() in mirror
@@ -165,6 +231,10 @@ async def process_sig(db, key, upload_fs, download_fs, etag, size, last_modified
     records = extract_record(sig, key, sha256, last_modified, size)
     if not uploaded:
         _result = await upload_mirror(upload_fs, raw_sig, s3_path)
+
+    with current_tasks.get_lock():
+        current_tasks.value += 1
+    progress.update(task_bytes, advance=size)
 
     return records
 
