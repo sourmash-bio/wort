@@ -1,17 +1,21 @@
 # /// script
-# requires-python = ">=3.12"
+# requires-python = ">=3.14"
 # dependencies = [
-#     "polars",
-#     "rich",
-#     "s3fs",
-#     "sourmash",
+#     "boto3",
+#     "polars==1.36.1",
+#     "rich==14.2",
+#     "s3fs==2025.12.0",
+#     "sourmash==4.9.4",
 # ]
+# [tool.uv]
+# exclude-newer = "2025-12-22T00:00:00Z"
 # ///
 
 import asyncio
 import io
 import hashlib
 from datetime import datetime
+from functools import partial
 from itertools import chain, batched
 from multiprocessing import Value
 
@@ -64,8 +68,8 @@ async def upload_mirror(client, data, location):
     )
 
 
-def download_current_manifest(args):
-    manifest_url = f"{args.archive_url}/wort-{args.db}/SOURMASH-MANIFEST.parquet"
+def download_current_manifest(archive_url, db):
+    manifest_url = f"{archive_url}/wort-{db}/SOURMASH-MANIFEST.parquet"
     manifest_df = pl.scan_parquet(manifest_url)
     return manifest_df
 
@@ -84,7 +88,7 @@ def extract_record(sigs, location, sha256, creation_date, size):
     return records
 
 
-async def main(original_listing, current_manifest, db):
+async def main(original_listing, current_manifest, db, archive_url):
     original = pl.scan_ndjson(original_listing).with_columns(
         pl.col.key.str.strip_prefix(f"s3://wort-{db}/").name.keep()
     )
@@ -104,9 +108,7 @@ async def main(original_listing, current_manifest, db):
     )
 
     upload_fs = s3fs.S3FileSystem(
-        anon=False,
-        endpoint_url=ARCHIVE_URL,
-        profile="denbi",
+        anon=False, profile="denbi", client_kwargs={"endpoint_url": ARCHIVE_URL}
     )
 
     manifest_records = {}
@@ -145,7 +147,7 @@ async def main(original_listing, current_manifest, db):
             for chnk in batched(
                 # diff.filter(pl.col.key.is_in(TEST_DATASETS)).collect().iter_rows()
                 diff.collect().iter_rows(),
-                n=100,
+                n=1_000,
             ):
                 tasks = {}
                 async with asyncio.TaskGroup() as tg:
@@ -180,16 +182,28 @@ async def main(original_listing, current_manifest, db):
     # merge new manifest_records into current_manifest
     # note: will have three records per location!
     new_rows = list(chain.from_iterable(manifest_records.values()))
+
     new_records = pl.DataFrame(
         new_rows, schema=current_manifest.collect_schema()
     ).lazy()
     new_manifest = pl.concat([current_manifest, new_records])
 
-    # TODO: put new manifest in mirror
-    new_manifest.sink_parquet(
-        "new_manifest.parquet",
-        compression_level=22,
-    )
+    if new_rows:
+        # put new manifest in mirror
+
+        # can't sink_parquet straight into S3 yet =/
+        manifest_data = io.BytesIO()
+        new_manifest.sink_parquet(
+            manifest_data,
+            compression_level=22,
+        )
+        manifest_data.flush()
+        manifest_data.seek(0)
+
+        upload_fs.pipe_file(
+            f"s3://wort-{db}/SOURMASH-MANIFEST.parquet",
+            manifest_data.getvalue(),
+        )
 
     return new_manifest, diff
 
@@ -228,7 +242,10 @@ async def process_sig(
     raw_sig = data.getvalue()
     sig = load_signatures(raw_sig)
 
-    records = extract_record(sig, key, sha256, last_modified, size)
+    loop = asyncio.get_running_loop()
+    extract = partial(extract_record, sig, key, sha256, last_modified, size)
+    records = await loop.run_in_executor(None, extract)
+
     if not uploaded:
         _result = await upload_mirror(upload_fs, raw_sig, s3_path)
 
@@ -254,15 +271,13 @@ if __name__ == "__main__":
         help=f"Which database to download. Available databases: {', '.join(DATABASES)}",
     )
     parser.add_argument("original_listing")
-    # parser.add_argument("mirror_listing")
-    # parser.add_argument("current_manifest")
 
     args = parser.parse_args()
 
-    current_manifest = download_current_manifest(args)
+    current_manifest = download_current_manifest(args.archive_url, args.db)
 
     new_manifest, diff = asyncio.run(
-        main(args.original_listing, current_manifest, args.db)
+        main(args.original_listing, current_manifest, args.db, args.archive_url)
     )
 
     print(diff.head(5).collect())
