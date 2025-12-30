@@ -14,10 +14,12 @@
 import asyncio
 import io
 import hashlib
+from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from itertools import chain, batched
 from multiprocessing import Value
+from pathlib import Path
 
 import s3fs
 import polars as pl
@@ -88,7 +90,36 @@ def extract_record(sigs, location, sha256, creation_date, size):
     return records
 
 
-async def main(original_listing, current_manifest, db, archive_url):
+def load_partial_manifest(partial_manifest, schema):
+    if not Path(partial_manifest).exists():
+        # write header for future use
+        df = pl.DataFrame(
+            schema=schema,
+        )
+        df.write_csv(partial_manifest)
+
+        return {}
+
+    # load records
+    records = defaultdict(list)
+    df = pl.read_csv(partial_manifest, schema=schema).unique(
+        [
+            "internal_location",
+            "md5",
+        ],
+        maintain_order=True,
+    )
+
+    for row in df.iter_rows(named=True):
+        key = row["internal_location"]
+        records[key].append(row)
+
+    return records
+
+
+async def main(
+    original_listing, current_manifest, db, archive_url, partial_manifest=None
+):
     original = pl.scan_ndjson(original_listing).with_columns(
         pl.col.key.str.strip_prefix(f"s3://wort-{db}/").name.keep()
     )
@@ -110,6 +141,11 @@ async def main(original_listing, current_manifest, db, archive_url):
     upload_fs = s3fs.S3FileSystem(
         anon=False, profile="denbi", client_kwargs={"endpoint_url": ARCHIVE_URL}
     )
+
+    schema = current_manifest.collect_schema()
+    if partial_manifest is None:
+        partial_manifest = f"{db}-manifest.partial"
+    partial_manifest_records = load_partial_manifest(partial_manifest, schema)
 
     manifest_records = {}
     task_lock = asyncio.Lock()
@@ -146,16 +182,19 @@ async def main(original_listing, current_manifest, db, archive_url):
         try:
             for chnk in batched(
                 # diff.filter(pl.col.key.is_in(TEST_DATASETS)).collect().iter_rows()
-                diff.collect().iter_rows(),
-                n=1_000,
+                diff.sort(by="size", descending=True).collect().iter_rows(),
+                n=4,
             ):
                 tasks = {}
+                new_records = {}
+
                 async with asyncio.TaskGroup() as tg:
                     for key, etag, last_modified, type, size, storage_class in chnk:
                         task = tg.create_task(
                             process_sig(
                                 db,
                                 key,
+                                partial_manifest_records,
                                 upload_fs,
                                 download_fs,
                                 etag,
@@ -172,9 +211,26 @@ async def main(original_listing, current_manifest, db, archive_url):
                 for key, task in tasks.items():
                     records = task.result()
                     manifest_records[key] = records
+                    new_records[key] = records
+
+                # save new records into partial_manifest
+                with open(partial_manifest, mode="a") as f:
+                    # load new_records as dataframe
+                    new_rows = list(chain.from_iterable(new_records.values()))
+                    df = pl.DataFrame(
+                        new_rows,
+                        schema=schema,
+                        orient="row",
+                    )
+                    df.write_csv(f, include_header=False)
+
+                    partial_manifest_records.update(new_records)
+
         except* Exception as eg:
             print(*[str(e)[:80] for e in eg.exceptions])
             print(len(eg.exceptions))
+            # TODO: should probably re-raise
+            raise Exception("error occurred")
         finally:
             await download_session.close()
             await upload_session.close()
@@ -183,10 +239,12 @@ async def main(original_listing, current_manifest, db, archive_url):
     # note: will have three records per location!
     new_rows = list(chain.from_iterable(manifest_records.values()))
 
-    new_records = pl.DataFrame(
-        new_rows, schema=current_manifest.collect_schema()
-    ).lazy()
-    new_manifest = pl.concat([current_manifest, new_records])
+    new_records = pl.DataFrame(new_rows, schema=schema).lazy()
+    new_manifest = (
+        pl.concat([current_manifest, new_records])
+        .unique(["internal_location", "md5"], maintain_order=True)
+        .sort(by=["creation_date", "internal_location"], descending=False)
+    )
 
     if new_rows:
         # put new manifest in mirror
@@ -205,12 +263,15 @@ async def main(original_listing, current_manifest, db, archive_url):
             manifest_data.getvalue(),
         )
 
+        # TODO: delete partial_manifest
+
     return new_manifest, diff
 
 
 async def process_sig(
     db,
     key,
+    partial_manifest_records,
     upload_fs,
     download_fs,
     etag,
@@ -230,24 +291,33 @@ async def process_sig(
     except FileNotFoundError:
         uploaded = False
     else:
-        uploaded = mirror_info["ETag"] == etag and mirror_info["size"] == size
+        uploaded = (
+            mirror_info["ETag"].strip('"') == etag and mirror_info["size"] == size
+        )
 
     # if data is already in mirror, let's download from it instead
     src_fs = download_fs
     if uploaded:
         src_fs = upload_fs
 
-    (data, sha256) = await download_original(src_fs, s3_path)
+    if (records := partial_manifest_records.get(key)) and uploaded:
+        # this was already uploaded, so just return the records
+        pass
+    else:
+        # TODO: save to temp file, instead of memory
+        (data, sha256) = await download_original(src_fs, s3_path)
 
-    raw_sig = data.getvalue()
-    sig = load_signatures(raw_sig)
+        raw_sig = data.getvalue()
+        del data
+        sig = load_signatures(raw_sig)
 
-    loop = asyncio.get_running_loop()
-    extract = partial(extract_record, sig, key, sha256, last_modified, size)
-    records = await loop.run_in_executor(None, extract)
+        loop = asyncio.get_running_loop()
+        extract = partial(extract_record, sig, key, sha256, last_modified, size)
+        records = await loop.run_in_executor(None, extract)
+        del sig
 
-    if not uploaded:
-        _result = await upload_mirror(upload_fs, raw_sig, s3_path)
+        if not uploaded:
+            _result = await upload_mirror(upload_fs, raw_sig, s3_path)
 
     with current_tasks.get_lock():
         current_tasks.value += 1
@@ -277,7 +347,7 @@ if __name__ == "__main__":
     current_manifest = download_current_manifest(args.archive_url, args.db)
 
     new_manifest, diff = asyncio.run(
-        main(args.original_listing, current_manifest, args.db, args.archive_url)
+        main(args.original_listing, current_manifest, args.db, args.archive_url, None)
     )
 
     print(diff.head(5).collect())
