@@ -1,6 +1,7 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
+#     "aiofiles",
 #     "boto3",
 #     "polars==1.36.1",
 #     "rich==14.2",
@@ -21,6 +22,7 @@ from itertools import chain, batched
 from multiprocessing import Value
 from pathlib import Path
 
+import aiofiles
 import s3fs
 import polars as pl
 from rich.progress import (
@@ -48,20 +50,19 @@ ARCHIVE_URL = "https://s3.bi.denbi.de"
 DATABASES = ["full", "img", "genomes", "sra"]
 
 
-async def download_original(client, location):
-    data = io.BytesIO()
+async def download_original(client, location, fp):
     try:
         f = await client.open_async(location)
         h = hashlib.new("sha256")
         while (chnk := await f.read(1024 * 1024)) != b"":
             h.update(chnk)
-            data.write(chnk)
+            await fp.write(chnk)
         sha256 = h.hexdigest()
-        data.flush()
+        await fp.flush()
     finally:
         await f.close()
 
-    return (data, sha256)
+    return sha256
 
 
 async def upload_mirror(client, data, location):
@@ -304,20 +305,21 @@ async def process_sig(
         # this was already uploaded, so just return the records
         pass
     else:
-        # TODO: save to temp file, instead of memory
-        (data, sha256) = await download_original(src_fs, s3_path)
+        async with aiofiles.tempfile.NamedTemporaryFile() as data:
+            # save to temp file, instead of memory
+            sha256 = await download_original(src_fs, s3_path, data)
+            await data.flush()
 
-        raw_sig = data.getvalue()
-        del data
-        sig = load_signatures(raw_sig)
+            await data.seek(0)
+            sig = load_signatures(data.name)
+            loop = asyncio.get_running_loop()
+            extract = partial(extract_record, sig, key, sha256, last_modified, size)
+            records = await loop.run_in_executor(None, extract)
+            del sig
 
-        loop = asyncio.get_running_loop()
-        extract = partial(extract_record, sig, key, sha256, last_modified, size)
-        records = await loop.run_in_executor(None, extract)
-        del sig
-
-        if not uploaded:
-            _result = await upload_mirror(upload_fs, raw_sig, s3_path)
+            await data.seek(0)
+            if not uploaded:
+                _result = await upload_mirror(upload_fs, data, s3_path)
 
     with current_tasks.get_lock():
         current_tasks.value += 1
