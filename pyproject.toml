@@ -24,6 +24,7 @@ pip = "*"
 
 [tool.pixi.feature.web.pypi-dependencies]
 gunicorn = ">=20.1.0,<20.2"
+greenlet = "~=3.2.4"  # last version with glibc 2.17, needed for OPC instance
 flask = "<2.3.0"
 redis = ">=4.5.5,<4.6"
 flask-wtf = ">=1.1.1,<1.2"
@@ -45,11 +46,32 @@ pip = "*"
 # Used for installing into worker, as a post-process step
 [tool.pixi.feature.dev.pypi-dependencies]
 biopython = ">=1.81,<2"
-pandas = ">=2.0.3,<2.1"
+pandas = "~=2.2.0"
 wort = { path = ".", editable = true }
 
 [tool.pixi.feature.dev.dependencies]
 awscli = ">=2.15.8,<2.16"
+s3fs = ">=2025.12.0,<2026"
+sourmash = ">=4.8.14,<5"
+
+[tool.pixi.feature.archive.dependencies]
+s5cmd = ">=2.2.2,<3"
+polars = ">=1.33.0,<2"
+
+[tool.pixi.feature.archive.tasks.s3_sync]
+args = [ "date" ]
+cmd = "./s3_sync.sh {{ date }}"
+cwd = "machine/archive"
+
+[tool.pixi.feature.archive.tasks.download_s3_metadata]
+args = [ "update_logs", "s5cmd_commands" ]
+cmd = "python scripts/parse_update_logs.py {{ update_logs }} {{ s5cmd_commands }}"
+cwd = "machine/archive"
+
+[tool.pixi.feature.archive.tasks.augment_manifest]
+args = [ "format", "basedir", "manifest", "sha256", "s3_metadata", "output" ]
+cwd = "machine/archive"
+cmd = "python scripts/augment_csv.py -F {{ format }} -b {{ basedir }} {{ manifest }} {{ sha256 }} {{ s3_metadata }} {{ output }}"
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"
@@ -75,11 +97,13 @@ postinstall-prod = "python -m pip install --no-deps --disable-pip-version-check 
 
 [tool.pixi.environments]
 # Default environment, has features for running in development, testing, and building
-default = { features = ["test", "dev", "build", "web", "worker"], solve-group = "default" }
+default = { features = ["test", "dev", "build", "web", "worker", "archive"], solve-group = "default" }
 # Leaner environment for use in production
 web = { features = ["web"], solve-group = "default" }
 worker = { features = ["worker", "web"], solve-group = "default" }
+# Used in the main archive machine
+archive = { features = ["archive"], solve-group = "default" }
 
 [tool.pixi.system-requirements]
 linux = "3.10"
-libc = "2.24"
+libc = "2.17"
