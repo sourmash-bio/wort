@@ -43,10 +43,8 @@ def compute(sra_id):
         try:
             result = run(
                 "set -euo pipefail; "
-                f"fastq-dump --disable-multithreading --fasta 0 --skip-technical --readids --read-filter pass --dumpbase --split-spot --clip -Z {sra_id} | "
-                "sourmash compute -k 21,31,51 "
-                "  --scaled 1000 "
-                "  --track-abundance "
+                f"sracha get --split interleaved --fasta --prefer-ena -Z {sra_id} | "
+                "sourmash sketch dna -p k=21,k=31,k=51,abund,scaled=1000 "
                 f"  --name {sra_id} "
                 f"  -o {f.name} "
                 "  - ",
@@ -116,9 +114,7 @@ def compute_genomes(accession, path, name):
         try:
             result = run(
                 "set -euo pipefail; "
-                "sourmash compute -k 21,31,51 "
-                "  --scaled 1000 "
-                "  --track-abundance "
+                "sourmash sketch dna -p k=21,k=31,k=51,abund,scaled=1000 "
                 f"  --name {shlex.quote(name)} "
                 f"  -o {f.name} "
                 f"  <(curl {path} | zcat)",

@@ -13,7 +13,10 @@ requires-python = ">=3.10"
 
 [tool.pixi.workspace]
 channels = ["conda-forge", "bioconda"]
-platforms = ["linux-64", "linux-aarch64"]
+platforms = [
+  { platform = "linux-64", linux = "3.10", glibc = "2.24" },
+  { platform = "linux-aarch64", linux = "3.10", glibc = "2.24" },
+]
 
 [tool.pixi.feature.web.dependencies]
 curl = ">=8.5.0,<8.6"
@@ -39,8 +42,8 @@ celery = { version = ">=5.3.1,<5.4", extras = ["sqs", "s3"] }
 
 [tool.pixi.feature.worker.dependencies]
 sourmash-minimal = ">=4.8.5,<4.9"
-sra-tools = "~=3.2.0"
 pip = "*"
+sracha = ">=0.3.10,<0.4"
 
 # Used for installing into worker, as a post-process step
 [tool.pixi.feature.dev.pypi-dependencies]
@@ -79,7 +82,3 @@ default = { features = ["test", "dev", "build", "web", "worker"], solve-group = 
 # Leaner environment for use in production
 web = { features = ["web"], solve-group = "default" }
 worker = { features = ["worker", "web"], solve-group = "default" }
-
-[tool.pixi.system-requirements]
-linux = "3.10"
-libc = "2.24"
